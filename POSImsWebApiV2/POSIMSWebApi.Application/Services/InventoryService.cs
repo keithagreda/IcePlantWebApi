@@ -596,9 +596,10 @@ namespace POSIMSWebApi.Application.Services
                     TotalQuantity = g.Sum(e => e.Qty)
                 }).ToListAsync();
 
-            if (getCurrentInventory.Count <= 0)
+            if (!getCurrentInventory.Any())
             {
-                throw new ArgumentNullException("Invalid Action! There is no beginning inventory", nameof(getCurrentInventory));
+                return ApiResponse<List<CurrentInventoryV1Dto>>.Fail("Invalid Action! There is no beginning inventory");
+                //throw new ArgumentNullException("Invalid Action! There is no beginning inventory", nameof(getCurrentInventory));
             }
 
             // Received Stocks

@@ -20,7 +20,7 @@ namespace POSIMSWebApi.Interceptors
                 {
                     entry.State = EntityState.Modified;
                     delete.IsDeleted = true;
-                    delete.DeletionTime = DateTimeOffset.UtcNow;
+                    delete.DeletionTime = DateTime.UtcNow;
                 }
             }
 

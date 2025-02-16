@@ -144,7 +144,7 @@ namespace POSIMSWebApi.Controllers
             {
                 return ApiResponse<CreateProductV1Dto>.Fail("Invalid action! Id can't be null");
             }
-            var data = await _unitOfWork.Product.GetQueryable().Include(e => e.ProductCategories)
+            var data = await _unitOfWork.Product.GetQueryable().Where(e => e.Id == id).Include(e => e.ProductCategories)
                 .Select(e => new CreateProductV1Dto
                 {
                     Id = e.Id,
@@ -195,6 +195,7 @@ namespace POSIMSWebApi.Controllers
         {
             try
             {
+                
                 var query = _unitOfWork.Product.GetQueryable();
                 var product = await query
                     .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => false || e.Name.Contains(input.FilterText))
@@ -208,6 +209,10 @@ namespace POSIMSWebApi.Controllers
                     .ToListAsync(); // Ensure it's executed in memory
 
                 var getStocks = await _inventoryService.GetCurrentStocksV1();
+                if (!getStocks.IsSuccess)
+                {
+                    return Ok(ApiResponse<PaginatedResult<GetProductDropDownTableV1Dto>>.Fail(getStocks.Message));
+                }
                 var stocks = getStocks.Data;
 
                 var productStocks =  (from p in product
@@ -231,7 +236,7 @@ namespace POSIMSWebApi.Controllers
             catch (Exception ex)
             {
 
-                throw ex;
+                return BadRequest(ApiResponse<PaginatedResult<GetProductDropDownTableV1Dto>>.Fail("Error! " + ex.Message));
             }
         }
 

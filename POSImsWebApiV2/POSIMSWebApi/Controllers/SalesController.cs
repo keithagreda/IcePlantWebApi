@@ -237,5 +237,22 @@ namespace POSIMSWebApi.Controllers
                 return BadRequest(ApiResponse<PaginatedResult<ViewSalesHeaderDto>>.Fail(ex.Message));
             }
         }
+
+        public async Task<ActionResult<ApiResponse<string>>> VoidSalesAsync(Guid id)
+        {
+            try
+            {
+                var salesToBeVoided = await _unitOfWork.SalesHeader.FirstOrDefaultAsync(e => e.Id == id);
+                var salesTransNum = salesToBeVoided.TransNum;
+                await _unitOfWork.SalesHeader.RemoveAsync(salesToBeVoided);
+                return Ok(ApiResponse<string>.Success($"Transaction Number: {salesTransNum} has been successfully voided!"));
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
     }
 }

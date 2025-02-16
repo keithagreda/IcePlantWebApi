@@ -80,15 +80,16 @@ namespace POSIMSWebApi.Application.Services
             toEdit.ProdCode = generatedProdCode;
             toEdit.Name = input.Name;
             toEdit.DaysTillExpiration = input.DaysTillExpiration;
+            //category is not allowed for now
 
-            var categ = await _unitOfWork.ProductCategory.GetQueryable().Where(e => e.Id == input.ProductCategories.Id).ToListAsync();
+            //var categ = await _unitOfWork.ProductCategory.GetQueryable().Where(e => e.Id == input.ProductCategories.Id).ToListAsync();
 
-            if (categ.Count <= 0)
-            {
-                return ApiResponse<string>.Fail("Product Creation failed input Category doesn't exist!");
-            }
+            //if (categ.Count <= 0)
+            //{
+            //    return ApiResponse<string>.Fail("Product Creation failed input Category doesn't exist!");
+            //}
 
-            toEdit.ProductCategories = categ;
+            //toEdit.ProductCategories = categ;
             toEdit.Price = input.Price;
 
             _unitOfWork.Complete();

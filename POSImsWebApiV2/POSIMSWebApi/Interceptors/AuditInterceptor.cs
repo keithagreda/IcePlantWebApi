@@ -28,14 +28,14 @@ namespace POSIMSWebApi.Interceptors
                     {
                         if (entry.State == EntityState.Added)
                         {
-                            auditableEntity.CreationTime = DateTimeOffset.UtcNow;
+                            auditableEntity.CreationTime = DateTime.UtcNow;
                             //TODO: change it once auth is implemented
                             auditableEntity.CreatedBy = userId;
                         }
                         if (entry.State == EntityState.Modified)
                         {
                             auditableEntity.ModifiedBy = userId;
-                            auditableEntity.ModifiedTime = DateTimeOffset.UtcNow;
+                            auditableEntity.ModifiedTime = DateTime.UtcNow;
                         }
                     }
                 }

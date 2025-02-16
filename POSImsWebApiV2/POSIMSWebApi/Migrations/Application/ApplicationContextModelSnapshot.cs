@@ -31,7 +31,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("CustomerType")
@@ -40,7 +40,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Firstname")
@@ -61,7 +61,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
@@ -118,13 +118,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
@@ -136,7 +136,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
@@ -159,13 +159,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("InventoryBeginningId")
@@ -180,7 +180,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ProductId")
@@ -209,7 +209,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("DaysTillExpiration")
@@ -218,7 +218,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
@@ -230,7 +230,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
@@ -260,13 +260,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
@@ -278,7 +278,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
@@ -302,13 +302,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("InventoryBeginningId")
@@ -323,7 +323,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ProductId")
@@ -353,13 +353,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
@@ -375,7 +375,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TransNum")
@@ -402,13 +402,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("Discount")
@@ -423,7 +423,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ProductId")
@@ -456,7 +456,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CustomerId")
@@ -465,7 +465,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("InventoryBeginningId")
@@ -480,7 +480,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("RemarksId")
@@ -513,13 +513,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
@@ -531,7 +531,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("SalesHeaderId")
@@ -558,13 +558,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
@@ -576,7 +576,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("StockDamageHeaderId")
@@ -603,13 +603,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
@@ -621,7 +621,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Quantity")
@@ -647,13 +647,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
@@ -665,7 +665,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("StockNum")
@@ -699,13 +699,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("ExpirationDate")
@@ -720,7 +720,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ProductId")
@@ -747,13 +747,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("InventoryBeginningId")
@@ -768,7 +768,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("Quantity")
@@ -801,13 +801,13 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("DeletionTime")
+                    b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
@@ -823,7 +823,7 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("ModifiedTime")
+                    b.Property<DateTime?>("ModifiedTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
