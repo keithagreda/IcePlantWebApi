@@ -483,3 +483,4 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 *.bru
+POSImsWebApiV2/POSIMSWebApi/appsettings.json

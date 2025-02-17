@@ -22,6 +22,11 @@ namespace Domain.Interfaces
         IRemarksRepository Remarks { get; }
         IProductStocksRepository ProductStocks { get; }
         IEntityHistoryRepository EntityHistory { get; }
+        IMachineRepository Machine { get; }
+        IMachineProductionRepository MachineProduction { get; }
+        IStockReconciliationRepository StockReconciliation { get; }
+        ICreditRepository Credit { get; }
+        IProductCostRepository ProductCost { get; }
         int Complete();
         Task<int> CompleteAsync();
         IQueryable<T> ExecuteRawQuery<T>(string sql, object parameters = null);

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using POSIMSWebApi;
@@ -11,9 +12,11 @@ using POSIMSWebApi;
 namespace POSIMSWebApi.Migrations.Application
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250217125203_addedNewEntities")]
+    partial class addedNewEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,55 +24,6 @@ namespace POSIMSWebApi.Migrations.Application
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Domain.Entities.Credit", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("CreditName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("InventoryBeginningId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid?>("ModifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ModifiedTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InventoryBeginningId");
-
-                    b.ToTable("Credits");
-                });
 
             modelBuilder.Entity("Domain.Entities.Customer", b =>
                 {
@@ -247,94 +201,6 @@ namespace POSIMSWebApi.Migrations.Application
                     b.ToTable("InventoryBeginningDetails");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Machine", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid?>("ModifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ModifiedTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Machines");
-                });
-
-            modelBuilder.Entity("Domain.Entities.MachineProduction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("MachineId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("ModifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ModifiedTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("StocksReceivingId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MachineId");
-
-                    b.HasIndex("StocksReceivingId");
-
-                    b.ToTable("MachineProductions");
-                });
-
             modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -425,58 +291,6 @@ namespace POSIMSWebApi.Migrations.Application
                     b.HasKey("Id");
 
                     b.ToTable("ProductCategories");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ProductCost", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid?>("ModifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ModifiedTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductCosts");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductStocks", b =>
@@ -825,55 +639,6 @@ namespace POSIMSWebApi.Migrations.Application
                     b.ToTable("StockDamageHeaders");
                 });
 
-            modelBuilder.Entity("Domain.Entities.StockReconciliation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsModified")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid?>("ModifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ModifiedTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("RemarksId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("TransNum")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RemarksId");
-
-                    b.ToTable("StockReconciliations");
-                });
-
             modelBuilder.Entity("Domain.Entities.StocksDetail", b =>
                 {
                     b.Property<int>("Id")
@@ -1088,15 +853,6 @@ namespace POSIMSWebApi.Migrations.Application
                     b.ToTable("ProductProductCategory");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Credit", b =>
-                {
-                    b.HasOne("Domain.Entities.InventoryBeginning", "InventoryBeginningFk")
-                        .WithMany()
-                        .HasForeignKey("InventoryBeginningId");
-
-                    b.Navigation("InventoryBeginningFk");
-                });
-
             modelBuilder.Entity("Domain.Entities.InventoryBeginningDetails", b =>
                 {
                     b.HasOne("Domain.Entities.InventoryBeginning", "InventoryBeginningFk")
@@ -1114,34 +870,6 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Navigation("InventoryBeginningFk");
 
                     b.Navigation("ProductFK");
-                });
-
-            modelBuilder.Entity("Domain.Entities.MachineProduction", b =>
-                {
-                    b.HasOne("Domain.Entities.Machine", "MachineFk")
-                        .WithMany()
-                        .HasForeignKey("MachineId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.StocksReceiving", "StocksReceivingFk")
-                        .WithMany()
-                        .HasForeignKey("StocksReceivingId");
-
-                    b.Navigation("MachineFk");
-
-                    b.Navigation("StocksReceivingFk");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ProductCost", b =>
-                {
-                    b.HasOne("Domain.Entities.Product", "ProductFk")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProductFk");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductStocks", b =>
@@ -1239,15 +967,6 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Navigation("StockDamageHeaderFk");
 
                     b.Navigation("StockDetailFk");
-                });
-
-            modelBuilder.Entity("Domain.Entities.StockReconciliation", b =>
-                {
-                    b.HasOne("Domain.Entities.Remarks", "RemarksFk")
-                        .WithMany()
-                        .HasForeignKey("RemarksId");
-
-                    b.Navigation("RemarksFk");
                 });
 
             modelBuilder.Entity("Domain.Entities.StocksDetail", b =>

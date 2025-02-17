@@ -113,7 +113,7 @@ namespace POSIMSWebApi.Controllers
             var result = await _salesService.GetPerMonthSales(year);
             return Ok(result);
         }
-        //[Authorize(Roles = UserRole.Admin + "," + UserRole.Owner)]
+        [Authorize(Roles = UserRole.Admin + "," + UserRole.Owner)]
         [HttpGet("GetSalesSummary")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<SalesSummaryDto>>>> GetSalesSummary([FromQuery] GenericSearchParams input)
         {

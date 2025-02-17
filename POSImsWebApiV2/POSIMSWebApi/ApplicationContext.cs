@@ -102,7 +102,7 @@ namespace POSIMSWebApi
         //    {
         //        var originalValue = modifiedEntity.OriginalValues[property];
         //        var currentValue = modifiedEntity.CurrentValues[property];
-        //        if(Equals(originalValue, currentValue))
+        //        if (Equals(originalValue, currentValue))
         //        {
         //            changes.AppendLine(
         //                string.Format(
@@ -126,7 +126,7 @@ namespace POSIMSWebApi
         //    }
         //    return changes.ToString();
         //}
-        
+
         public DbSet<SalesHeader> SalesHeaders { get; set; }
         public DbSet<SalesDetail> SalesDetails { get; set; }
         public DbSet<Product> Products { get; set; }
@@ -142,7 +142,11 @@ namespace POSIMSWebApi
         public DbSet<InventoryBeginningDetails> InventoryBeginningDetails { get; set; }
         public DbSet<ProductStocks> ProductStocks { get; set; }
         public DbSet <EntityHistory> EntityHistories { get; set; }
-
+        public DbSet<Machine> Machines { get; set; }
+        public DbSet<MachineProduction> MachineProductions { get; set; }
+        public DbSet<StockReconciliation> StockReconciliations { get; set; }
+        public DbSet<Credit> Credits { get; set; }
+        public DbSet<ProductCost> ProductCosts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())

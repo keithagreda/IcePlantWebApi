@@ -10,4 +10,5 @@ namespace DataAccess.EFCore.Repositories
         {
         }
     }
+
 }

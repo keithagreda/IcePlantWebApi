@@ -17,5 +17,7 @@ namespace POSIMSWebApi.Application.Dtos.StocksReceiving
         public int ProductId { get; set; }
         [Required]
         public int StorageLocationId { get; set; }
+        [Required]
+        public int MachineId { get; set; }
     }
 }

@@ -32,6 +32,11 @@ namespace POSIMSWebApi.UnitOfWorks
             Remarks = new RemarksRepository(_context);
             ProductStocks = new ProductStocksRepository(_context);
             EntityHistory = new EntityHistoryRepository(_context);
+            Machine = new MachineRepository(_context);
+            MachineProduction = new MachineProductionRepository(_context);
+            StockReconciliation = new StockReconciliationRepository(_context);
+            Credit = new CreditRepository(_context);
+            ProductCost = new ProductCostRepository(_context);
         }
         public ISalesHeaderRepository SalesHeader { get; private set; }
         public ISalesDetailRepository SalesDetail { get; private set; }
@@ -47,6 +52,11 @@ namespace POSIMSWebApi.UnitOfWorks
         public IRemarksRepository Remarks { get; private set; }
         public IProductStocksRepository ProductStocks { get; private set; }
         public IEntityHistoryRepository EntityHistory { get; private set; }
+        public IMachineRepository Machine { get; }
+        public IMachineProductionRepository MachineProduction { get; private set; }
+        public IStockReconciliationRepository StockReconciliation { get; private set; }
+        public ICreditRepository Credit { get; private set; }
+        public IProductCostRepository ProductCost { get; private set; }
         public int Complete()
         {
             return _context.SaveChanges();
