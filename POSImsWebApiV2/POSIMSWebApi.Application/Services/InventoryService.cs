@@ -746,7 +746,8 @@ namespace POSIMSWebApi.Application.Services
                 Id = Guid.NewGuid(),
                 InventoryBeginningId = gcoId,
                 ProductId = product,
-                Qty = input.ReceivedQty
+                Qty = input.ReceivedQty,
+                MachineId = input.MachineId,
             };
 
             await _unitOfWork.InventoryBeginningDetails.AddAsync(newInventoryDetail);

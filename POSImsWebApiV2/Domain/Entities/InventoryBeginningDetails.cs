@@ -6,6 +6,9 @@ namespace Domain.Entities
     {
         public Guid Id { get; set; }
         public decimal Qty { get; set; }
+        public int MachineId { get; set; }
+        [ForeignKey("MachineId")]
+        public Machine MachineFk { get; set; }
         public int ProductId { get; set; }
         [ForeignKey("ProductId")]
         public Product ProductFK { get; set; }

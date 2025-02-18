@@ -5,15 +5,12 @@ namespace Domain.Entities
     public class MachineProduction : AuditedEntity
     {
         public int Id { get; set; }
+        public decimal Quantity { get; set; }
         public int MachineId { get; set; }
 
         [ForeignKey("MachineId")]
         public Machine MachineFk { get; set; }
-
-        public Guid? StocksReceivingId { get; set; }
-
-        [ForeignKey("StocksReceivingId")]
-        public StocksReceiving StocksReceivingFk { get; set; }
+        
 
     }
 }

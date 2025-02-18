@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace POSIMSWebApi.Application.Services
 {
-    public class MachineProductionService
+    public class MachineProductionService : IMachineProductionService
     {
         private readonly IUnitOfWork _unitOfWork;
         public MachineProductionService(IUnitOfWork unitOfWork)
@@ -33,6 +33,7 @@ namespace POSIMSWebApi.Application.Services
             await _unitOfWork.CompleteAsync();
             return ApiResponse<string>.Success("Success!");
         }
+
 
     }
 }
