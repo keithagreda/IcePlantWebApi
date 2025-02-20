@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POSIMSWebApi.Application.Dtos.Machine;
+using POSIMSWebApi.Application.Dtos.Pagination;
+using POSIMSWebApi.Application.Dtos.ProductDtos;
 using POSIMSWebApi.Authentication;
+using POSIMSWebApi.QueryExtensions;
 
 namespace POSIMSWebApi.Controllers
 {
@@ -37,9 +40,9 @@ namespace POSIMSWebApi.Controllers
         }
         [HttpPost("CreateOrEditMachineDto")]
         [Authorize(Roles = UserRole.Admin + "," + UserRole.Cashier)]
-        public async Task<ActionResult<ApiResponse<string>>> CreateOrEdit([FromBody]CreateOrEditMachineDto input)
+        public async Task<ActionResult<ApiResponse<string>>> CreateOrEdit([FromBody] CreateOrEditMachineDto input)
         {
-            if(input.Id is null)
+            if (input.Id is null)
             {
                 return Ok(await Create(input));
             }
@@ -69,7 +72,7 @@ namespace POSIMSWebApi.Controllers
         private async Task<ApiResponse<string>> Edit(CreateOrEditMachineDto input)
         {
             var existingMachine = await _unitOfWork.Machine.FirstOrDefaultAsync(e => e.Id == input.Id);
-            if(existingMachine is null)
+            if (existingMachine is null)
             {
                 return ApiResponse<string>.Fail("Error! Machine Not Found");
             }
@@ -93,6 +96,37 @@ namespace POSIMSWebApi.Controllers
                 return Ok(ApiResponse<CreateOrEditMachineDto>.Fail("Error! Machine Not Found"));
             }
             return Ok(ApiResponse<CreateOrEditMachineDto>.Success(dto));
+        }
+
+        [HttpGet("GetMachineForDropdown")]
+        public async Task<ActionResult<ApiResponse<PaginatedResult<GetMachineForDropDown>>>> GetMachineForDropdown([FromQuery] GenericSearchParams? input)
+        {
+            try
+            {
+
+                var query = _unitOfWork.Machine.GetQueryable();
+
+                var machine = await query
+                    .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => false || e.Description.Contains(input.FilterText))
+                    .ToPaginatedResult(input.PageNumber, input.PageSize)
+                    .Select(e => new GetMachineForDropDown
+                    {
+                        Id = e.Id,
+                        Description = e.Description,
+                    }).ToListAsync();
+
+                var totalCount = await query.CountAsync();
+
+                var result = new PaginatedResult<GetMachineForDropDown>(machine, totalCount, (int)input.PageNumber, (int)input.PageSize);
+
+
+                return Ok(ApiResponse<PaginatedResult<GetMachineForDropDown>>.Success(result));
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ApiResponse<PaginatedResult<GetMachineForDropDown>>.Fail("Error! " + ex.Message));
+            }
         }
     }
 }

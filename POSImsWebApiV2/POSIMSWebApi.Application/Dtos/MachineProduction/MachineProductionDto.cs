@@ -16,6 +16,13 @@ namespace POSIMSWebApi.Application.Dtos.MachineProduction
         public Guid? StocksReceivingId { get; set; }
     }
 
+    public class CreateOrEditMachineProductionDto
+    {
+        public int Id { get; set; }
+        public int MachineId { get; set; }
+        public Guid? StocksReceivingId { get; set; }
+    }
+
     public class GetMachineGenerationDto
     {
         public int Id { get; set; }

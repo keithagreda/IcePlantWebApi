@@ -23,18 +23,21 @@ namespace POSIMSWebApi.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IInventoryService _inventoryService;
         private readonly IStockDetailService _stockDetailService;
+        private readonly IMachineProductionService _machineProductionService;
         private readonly IMemoryCache _memoryCache;
         private readonly string _cacheKey = "Inventory";
         private readonly string _allInventory = "AllInventory";
         public StocksReceivingService(IUnitOfWork unitOfWork,
             IStockDetailService stockDetailService,
             IInventoryService inventoryService,
-            IMemoryCache memoryCache)
+            IMemoryCache memoryCache,
+            IMachineProductionService machineProductionService)
         {
             _unitOfWork = unitOfWork;
             _stockDetailService = stockDetailService;
             _inventoryService = inventoryService;
             _memoryCache = memoryCache;
+            _machineProductionService = machineProductionService;
         }
 
         public async Task<ApiResponse<string>> ReceiveStocks(CreateStocksReceivingDto input)
@@ -85,7 +88,10 @@ namespace POSIMSWebApi.Application.Services
 
             // Step 6: Save to the database
             await _unitOfWork.StocksReceiving.AddAsync(stocksReceiving);
-            _unitOfWork.Complete();
+            //create machine prod
+            await _machineProductionService.CreateOrEdit(input.MachineId, stocksReceiving.Id);
+
+            await _unitOfWork.CompleteAsync();
             _memoryCache.Remove(_cacheKey);
             _memoryCache.Remove(_allInventory);
             return ApiResponse<string>.Success("", "Successfully received stocks!");
