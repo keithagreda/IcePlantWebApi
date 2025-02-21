@@ -17,17 +17,20 @@ namespace POSIMSWebApi.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ApiResponse<string>> CreateOrEdit(int machineId, Guid stocksReceivingId)
+        public async Task<ApiResponse<string>> CreateOrEdit(int machineId, Guid invBegId, int productId, decimal qty, string transNum)
         {
-            return await Create(machineId, stocksReceivingId);
+            return await Create(machineId, invBegId, productId, qty, transNum);
         }
 
-        private async Task<ApiResponse<string>> Create(int machineId, Guid stocksReceivingId)
+        private async Task<ApiResponse<string>> Create(int machineId, Guid invBegId, int productId, decimal qty, string transNum)
         {
             var newProdction = new MachineProduction
             {
                 MachineId = machineId,
-                StocksReceivingId = stocksReceivingId
+                ProductId = productId,
+                InventoryBeginningId = invBegId,
+                Quantity = qty,
+                TransNum = transNum
             };
             await _unitOfWork.MachineProduction.AddAsync(newProdction);
             await _unitOfWork.CompleteAsync();

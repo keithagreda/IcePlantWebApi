@@ -25,8 +25,26 @@ namespace POSIMSWebApi.Application.Dtos.MachineProduction
 
     public class GetMachineGenerationDto
     {
-        public int Id { get; set; }
         public string MachineName { get; set; }
+        public List<MachineGenerationQty> MachineGenerationQtys { get; set; } = new List<MachineGenerationQty>();
+    }
+
+    public class GetMachineGenerationV1Dto
+    {
+        public string MachineName { get; set; }
+        public decimal Good { get; set; }
+        public decimal Bad { get; set; }
+    }
+
+    public class GetMachineGenerationWTotal
+    {
+        public decimal TotalGood { get; set; }
+        public decimal TotalGoodPercentage { get; set; }
+        public List<GetMachineGenerationV1Dto> GetMachineGenerationV1Dtos { get; set; } = new List<GetMachineGenerationV1Dto>();
+    }
+
+    public class MachineGenerationQty
+    {
         public string ProductName { get; set; }
         public decimal Quantity { get; set; }
     }

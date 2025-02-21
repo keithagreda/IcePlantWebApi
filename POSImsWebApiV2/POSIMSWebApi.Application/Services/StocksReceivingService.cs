@@ -55,6 +55,7 @@ namespace POSIMSWebApi.Application.Services
                     ProductId = input.ProductId,
                     ReceivedQty = input.Quantity,
                 };
+                await _machineProductionService.CreateOrEdit(input.MachineId, currentlyOpenedInv, input.ProductId, input.Quantity, DateTime.Now.ToString("g"));
                 var result = await _inventoryService.BeginningEntry(createBeginningEntryDto);
                 return ApiResponse<string>.Success(result);
             }
@@ -89,7 +90,7 @@ namespace POSIMSWebApi.Application.Services
             // Step 6: Save to the database
             await _unitOfWork.StocksReceiving.AddAsync(stocksReceiving);
             //create machine prod
-            await _machineProductionService.CreateOrEdit(input.MachineId, stocksReceiving.Id);
+            await _machineProductionService.CreateOrEdit(input.MachineId, currentlyOpenedInv, input.ProductId, input.Quantity, transNum);
 
             await _unitOfWork.CompleteAsync();
             _memoryCache.Remove(_cacheKey);

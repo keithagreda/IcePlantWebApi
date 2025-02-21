@@ -24,32 +24,46 @@ namespace POSIMSWebApi.Controllers
         }
 
         [HttpGet("GetAllMachineGeneration")]
-        public async Task<ActionResult<ApiResponse<PaginatedResult<GetMachineGenerationDto>>>> GetAllMachineGeneration([FromQuery] GetMachineGenerationInput input)
+        public async Task<ActionResult<ApiResponse<GetMachineGenerationWTotal>>> GetAllMachineGeneration([FromQuery] GetMachineGenerationInput input)
         {
-            var query = _unitOfWork.MachineProduction.GetQueryable()
-                .Include(e => e.MachineFk)
-                .Include(e => e.StocksReceivingFk)
-                .ThenInclude(e => e.StocksHeaderFk)
-                .ThenInclude(e => e.ProductFK);
+            try
+            {
+                var query = _unitOfWork.MachineProduction.GetQueryable()
+               .Include(e => e.MachineFk)
+               .Include(e => e.ProductFk);
 
-            var count = await query.CountAsync();
+                var count = await query.CountAsync();
 
-            var machineGeneration = await query
-                .WhereIf(input.MinCreationTime is not null, e => e.CreationTime >= input.MinCreationTime)
-                .WhereIf(input.MaxCreationTime is not null, e => e.CreationTime <= input.MaxCreationTime)
-                .GroupBy(e => e.MachineFk.Description)
-                .OrderBy(e => e.Select(e => e.StocksReceivingFk.StocksHeaderFk.ProductFK.Name))
-                .ToPaginatedResult(input.PageNumber, input.PageSize)
-                .Select(e => new GetMachineGenerationDto
-                {
-                    MachineName = e.Key,
-                    Id = e.Select(e => e.Id).FirstOrDefault(),
-                    ProductName = e.Select(e => e.StocksReceivingFk.StocksHeaderFk.ProductFK.Name).FirstOrDefault(),
-                    Quantity = e.Sum(e => e.StocksReceivingFk.Quantity)
-                }).ToListAsync();
+                var machineGeneration = await query
+                    .WhereIf(input.MinCreationTime is not null, e => e.CreationTime >= input.MinCreationTime)
+                    .WhereIf(input.MaxCreationTime is not null, e => e.CreationTime <= input.MaxCreationTime)
+                    .GroupBy(e => e.MachineFk.Description)
+                    .Select(machineGroup => new GetMachineGenerationV1Dto
+                    {
+                        MachineName = machineGroup.Key, // Machine Name
+                        Good = machineGroup.Where(e => e.ProductFk.Name == "Ice Block").Select(e => e.Quantity).Sum(),
+                        Bad = machineGroup.Where(e => e.ProductFk.Name == "Reject").Select(e => e.Quantity).Sum()
+                    }).ToListAsync();
 
-            return ApiResponse<PaginatedResult<GetMachineGenerationDto>>.Success(new PaginatedResult<GetMachineGenerationDto>(machineGeneration, count, 
-                (int)input.PageNumber, (int)input.PageSize));
+                var totalGood = machineGeneration.Sum(e => e.Good);
+                var totalBad = machineGeneration.Sum(e => e.Bad);
+
+
+                var res = new GetMachineGenerationWTotal 
+                { 
+                    TotalGood = machineGeneration.Sum(e => e.Good),
+                    TotalGoodPercentage = (totalGood / (totalGood + totalBad) ) * 100,
+                    GetMachineGenerationV1Dtos = machineGeneration,
+                };
+
+
+                return ApiResponse<GetMachineGenerationWTotal>.Success(res);
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
         }
     }
 }
