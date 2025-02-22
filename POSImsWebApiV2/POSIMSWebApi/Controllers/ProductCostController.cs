@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POSIMSWebApi.Application.Dtos.Pagination;
 using POSIMSWebApi.Application.Dtos.ProductCost;
+using POSIMSWebApi.Application.Dtos.ProductDtos;
 using POSIMSWebApi.Authentication;
 using POSIMSWebApi.QueryExtensions;
 
@@ -23,7 +24,7 @@ namespace POSIMSWebApi.Controllers
         }
         [HttpGet("GetAll")]
         [Authorize(Roles = UserRole.Admin)]
-        public async Task<ActionResult<ApiResponse<PaginatedResult<ProductCostDto>>>> GetAll([FromQuery]GetProductCostDto input)
+        public async Task<ActionResult<ApiResponse<PaginatedResult<ProductCostDto>>>> GetAll([FromQuery] GetProductCostInput input)
         {
             var query = _unitOfWork.ProductCost.GetQueryable()
                 .Include(e => e.ProductFk)
@@ -46,6 +47,31 @@ namespace POSIMSWebApi.Controllers
                 new PaginatedResult<ProductCostDto>(paginated, count, (int)input.PageNumber, (int)input.PageSize)
                 );
         }
+
+        //[HttpGet("GetProductCosting")]
+        //[Authorize(Roles = UserRole.Admin)]
+        //public async Task<ActionResult<ApiResponse<PaginatedResult<GetProductCostingDto>>>> GetProductCosting([FromQuery] GenericSearchParams input)
+        //{
+        //    var query = _unitOfWork.ProductCost.GetQueryable()
+        //        .Include(e => e.ProductFk)
+        //        .Include(e => e.ProductCostDetails)
+        //        .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => false || e.ProductFk.Name.Contains(input.FilterText) || e.Name.Contains(input.FilterText))
+        //        .GroupBy(e => e.ProductFk.Name)
+        //        .Select(e => new GetProductCostingDto
+        //        {
+        //            ProductName = e.Key,
+        //            ProductCosting = e.GroupBy(e => e.Id).Select(e => e.Select(e => e.ProductCostDetails.))
+        //        });
+
+        //    var paginated = await query.ToPaginatedResult(input.PageNumber, input.PageSize).ToListAsync();
+        //    var count = await query.CountAsync();
+
+        //    return ApiResponse<PaginatedResult<ProductCostDto>>.Success(
+        //        new PaginatedResult<ProductCostDto>(paginated, count, (int)input.PageNumber, (int)input.PageSize)
+        //        );
+        //}
+
+
         /// <summary>
         /// A function that allows a user to create and edit product cost
         /// if edit it sets the previous product cost to inactive and create new product cost
@@ -66,7 +92,7 @@ namespace POSIMSWebApi.Controllers
                 return ApiResponse<string>.Fail("Invalid Action! Product Cost Already Exists");
             }
 
-            if(input.Id is not null)
+            if(input.Id is null)
             {
                 return Ok(await Create(input));
             }

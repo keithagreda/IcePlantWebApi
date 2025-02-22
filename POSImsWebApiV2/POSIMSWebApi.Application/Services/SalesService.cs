@@ -8,6 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
 using POSIMSWebApi.Application.Dtos.Inventory;
 using POSIMSWebApi.Application.Dtos.Pagination;
+using POSIMSWebApi.Application.Dtos.ProductCostDetail;
 using POSIMSWebApi.Application.Dtos.ProductDtos;
 using POSIMSWebApi.Application.Dtos.Sales;
 using POSIMSWebApi.Application.Dtos.Stocks;
@@ -257,6 +258,12 @@ namespace POSIMSWebApi.Application.Services
                     salesHeader.CustomerId = customerId;
                 }
 
+                var productCost = await _unitOfWork.ProductCost.GetQueryable().Where(e => e.IsActive == true).Select(e => new
+                {
+                    e.ProductId,
+                    e.Id
+                }).ToListAsync();
+
                 //if (customerId is not null)
                 //{
                 //    var customer = await _unitOfWork.Customer.FirstOrDefaultAsync(e => e.Id == input.CustomerId);
@@ -271,6 +278,7 @@ namespace POSIMSWebApi.Application.Services
                 //}
 
                 var saleDetails = new List<SalesDetail>();
+                var productCostDetails = new List<ProductCostDetails>();
                 //TO DO FIGURE OUT HOW TO DEDUCT QTY IF STOCKS ARE NOT ENOUGH
                 foreach (var item in transJoin)
                 {
@@ -291,15 +299,28 @@ namespace POSIMSWebApi.Application.Services
                         SalesHeaderId = salesHeader.Id
                     };
 
+                    //create productCostDetail
+                    var currentProductCost = productCost.Where(e => e.ProductId == item.Id);
+                    var productCostDetail = new ProductCostDetails
+                    {
+                        SalesHeaderId = salesHeader.Id,
+                        ProductCostId = currentProductCost.Select(e => e.Id).FirstOrDefault()
+                    };
+
+
                     salesHeader.TotalAmount = salesHeader.TotalAmount += currAmount;
                     saleDetails.Add(saleDetail);
+                    productCostDetails.Add(productCostDetail);
                 }
+
+
 
                 //make a notification when discount is more than 30%
 
                 await _unitOfWork.SalesHeader.AddAsync(salesHeader);
                 await _unitOfWork.SalesDetail.AddRangeAsync(saleDetails);
-                _unitOfWork.Complete();
+                await _unitOfWork.ProductCostDetail.AddRangeAsync(productCostDetails);
+                await _unitOfWork.CompleteAsync();
                 _cacheService.RemoveInventoryCache();
                 _memoryCache.Remove(_totalSalesKey);
                 _memoryCache.Remove(_salesGraphKey);
@@ -385,7 +406,9 @@ namespace POSIMSWebApi.Application.Services
             var currentDate = DateTime.UtcNow;
             //SGT
             var shortDate = currentDate.AddHours(8).ToString("yyyyMMdd");
-            var salesHeaderCount = await _unitOfWork.SalesHeader.GetQueryable().Where(e => e.CreationTime.Date == currentDate.Date).CountAsync() + 1;
+            var salesHeaderCount = await _unitOfWork.SalesHeader.GetQueryable()
+                .IgnoreQueryFilters()
+                .Where(e => e.CreationTime.Date == currentDate.Date).CountAsync() + 1;
             var formattedCount = salesHeaderCount.ToString("D4");
             var transNum = $"T{shortDate}-{formattedCount}";
             return transNum;

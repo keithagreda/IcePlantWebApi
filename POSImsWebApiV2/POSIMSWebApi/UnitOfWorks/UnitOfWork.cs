@@ -37,6 +37,7 @@ namespace POSIMSWebApi.UnitOfWorks
             StockReconciliation = new StockReconciliationRepository(_context);
             Credit = new CreditRepository(_context);
             ProductCost = new ProductCostRepository(_context);
+            ProductCostDetail = new ProductCostDetailsRepository(_context);
         }
         public ISalesHeaderRepository SalesHeader { get; private set; }
         public ISalesDetailRepository SalesDetail { get; private set; }
@@ -57,6 +58,7 @@ namespace POSIMSWebApi.UnitOfWorks
         public IStockReconciliationRepository StockReconciliation { get; private set; }
         public ICreditRepository Credit { get; private set; }
         public IProductCostRepository ProductCost { get; private set; }
+        public IProductCostDetailsRepository ProductCostDetail { get; private set; }
         public int Complete()
         {
             return _context.SaveChanges();

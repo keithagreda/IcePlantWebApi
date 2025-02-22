@@ -65,15 +65,16 @@ namespace POSIMSWebApi.Application.Services
 
             //check if product name is changed
             var generatedProdCode = toEdit.ProdCode;
-            var count = 0;
             if (toEdit.Name != input.Name)
             {
                 generatedProdCode = GenerateProdCode(input.Name);
-                var existingCode = await query.Where(e => e.ProdCode.Contains(generatedProdCode) && e.Id != input.Id).ToListAsync();
+                var existingCodeCount = await query.Where(e => e.ProdCode.Contains(generatedProdCode) && e.Id != input.Id)
+                    .IgnoreQueryFilters()
+                    .CountAsync();
 
-                if (existingCode.Count > 0)
+                if (existingCodeCount > 0)
                 {
-                    generatedProdCode = $"{generatedProdCode}{existingCode.Count + 1}";
+                    generatedProdCode = $"{generatedProdCode}{existingCodeCount + 1}";
                 }
             }
 

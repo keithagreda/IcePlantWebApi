@@ -17,6 +17,20 @@ namespace POSIMSWebApi.Application.Dtos.ProductCost
         public int ProductId { get; set; }
     }
 
+    public class GetProductCostDto
+    {
+        public string ProductName { get; set; }
+        public decimal OverallEstimatedCost { get; set; }
+        public ICollection<ProductCosting> ProductCosting { get; set; } = new List<ProductCosting>();
+
+    }
+
+    public class ProductCosting
+    {
+        public string CostName { get; set; }
+        public decimal TotalEstimatedCost { get; set; }
+    }
+
     public class CreateOrEditProductCostDto
     {
         public int? Id { get; set; }

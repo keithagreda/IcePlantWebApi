@@ -147,6 +147,7 @@ namespace POSIMSWebApi
         public DbSet<StockReconciliation> StockReconciliations { get; set; }
         public DbSet<Credit> Credits { get; set; }
         public DbSet<ProductCost> ProductCosts { get; set; }
+        public DbSet<ProductCostDetails> ProductCostDetails { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())

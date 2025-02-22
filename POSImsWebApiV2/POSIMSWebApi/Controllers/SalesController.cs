@@ -153,31 +153,34 @@ namespace POSIMSWebApi.Controllers
         {
             try
             {
-                var query = _unitOfWork.SalesHeader.GetQueryable().Include(e => e.CustomerFk).Include(e => e.SalesDetails).ThenInclude(e => e.ProductFk)
-                .WhereIf(input.SalesHeaderId != null, e => e.Id == input.SalesHeaderId)
-                .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => e.TransNum.Contains(input.FilterText));
-                var projection = await query
-                    .Select(e => new ViewSalesHeaderDto
-                    {
-                        TransNum = e.TransNum,
-                        TransDate = e.CreationTime,
-                        TotalAmount = e.TotalAmount,
-                        CustomerName = e.CustomerFk.Name,
-                        SoldById = e.CreatedBy,
-                        SoldBy = e.CreatedBy.ToString(),
-                        //TODO:
-                        Discount = 0m,
-                        ViewSalesDetailDtos = e.SalesDetails.Select(e => new ViewSalesDetailDto
+                var query = _unitOfWork.SalesHeader.GetQueryable()
+                    .Include(e => e.InventoryBeginningFk)
+                    .Include(e => e.CustomerFk).Include(e => e.SalesDetails).ThenInclude(e => e.ProductFk)
+                    .WhereIf(input.ThisInventory != false, e => e.InventoryBeginningFk.Status == Domain.Enums.InventoryStatus.Open)
+                    .WhereIf(input.SalesHeaderId != null, e => e.Id == input.SalesHeaderId)
+                    .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => e.TransNum.Contains(input.FilterText));
+                    var projection = await query
+                        .Select(e => new ViewSalesHeaderDto
                         {
-                            Amount = e.ActualSellingPrice != 0 ? e.ActualSellingPrice : e.Amount,
-                            ItemName = e.ProductFk.Name,
-                            Quantity = e.Quantity,
-                            Rate = e.ProductPrice
-                        }).ToList()
-                    })
-                    .ToPaginatedResult(input.PageNumber, input.PageSize)
-                    .OrderByDescending(e => e.TransDate)
-                    .ToListAsync();
+                            TransNum = e.TransNum,
+                            TransDate = e.CreationTime,
+                            TotalAmount = e.TotalAmount,
+                            CustomerName = e.CustomerFk.Name,
+                            SoldById = e.CreatedBy,
+                            SoldBy = e.CreatedBy.ToString(),
+                            //TODO:
+                            Discount = 0m,
+                            ViewSalesDetailDtos = e.SalesDetails.Select(e => new ViewSalesDetailDto
+                            {
+                                Amount = e.ActualSellingPrice != 0 ? e.ActualSellingPrice : e.Amount,
+                                ItemName = e.ProductFk.Name,
+                                Quantity = e.Quantity,
+                                Rate = e.ProductPrice
+                            }).ToList()
+                        })
+                        .ToPaginatedResult(input.PageNumber, input.PageSize)
+                        .OrderByDescending(e => e.TransDate)
+                        .ToListAsync();
 
                 foreach(var header in projection)
                 {
