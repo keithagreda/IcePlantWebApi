@@ -13,6 +13,6 @@ namespace POSIMSWebApi.Application.Dtos.ProductCostDetail
         public Guid? Id { get; set; }
         public decimal Amount { get; set; }
         public int ProductCostId { get; set; }
-        public Guid SalesHeaderId { get; set; }
+        public Guid StocksReceivingId { get; set; }
     }
 }

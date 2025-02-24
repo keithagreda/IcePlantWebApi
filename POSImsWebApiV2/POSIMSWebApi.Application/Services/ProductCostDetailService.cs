@@ -37,7 +37,7 @@ namespace POSIMSWebApi.Application.Services
             var toCreate = new ProductCostDetails
             {
                 ProductCostId = input.ProductCostId,
-                SalesHeaderId = input.SalesHeaderId,
+                StocksReceivingId = input.StocksReceivingId,
             };
 
             await _unitOfWork.ProductCostDetail.AddAsync(toCreate);
@@ -53,7 +53,7 @@ namespace POSIMSWebApi.Application.Services
                 var res = new ProductCostDetails
                 {
                     ProductCostId = item.ProductCostId,
-                    SalesHeaderId = item.SalesHeaderId,
+                    StocksReceivingId = item.StocksReceivingId,
                 };
                 toCreate.Add(res);
             }

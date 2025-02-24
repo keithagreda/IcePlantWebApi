@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using POSIMSWebApi;
@@ -11,9 +12,11 @@ using POSIMSWebApi;
 namespace POSIMSWebApi.Migrations.Application
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250223020515_addedTotalCost")]
+    partial class addedTotalCost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -527,14 +530,14 @@ namespace POSIMSWebApi.Migrations.Application
                     b.Property<decimal>("ProductCostTotalAmount")
                         .HasColumnType("numeric");
 
-                    b.Property<Guid?>("StocksReceivingId")
+                    b.Property<Guid?>("SalesHeaderId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductCostId");
 
-                    b.HasIndex("StocksReceivingId");
+                    b.HasIndex("SalesHeaderId");
 
                     b.ToTable("ProductCostDetails");
                 });
@@ -1220,13 +1223,13 @@ namespace POSIMSWebApi.Migrations.Application
                         .WithMany("ProductCostDetails")
                         .HasForeignKey("ProductCostId");
 
-                    b.HasOne("Domain.Entities.StocksReceiving", "StocksReceivingFk")
+                    b.HasOne("Domain.Entities.SalesHeader", "SalesHeaderFk")
                         .WithMany()
-                        .HasForeignKey("StocksReceivingId");
+                        .HasForeignKey("SalesHeaderId");
 
                     b.Navigation("ProductCost");
 
-                    b.Navigation("StocksReceivingFk");
+                    b.Navigation("SalesHeaderFk");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductStocks", b =>

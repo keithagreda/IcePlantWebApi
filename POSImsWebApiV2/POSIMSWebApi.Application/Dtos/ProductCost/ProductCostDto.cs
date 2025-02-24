@@ -17,7 +17,7 @@ namespace POSIMSWebApi.Application.Dtos.ProductCost
         public int ProductId { get; set; }
     }
 
-    public class GetProductCostDto
+    public class GetProductCostingDto
     {
         public string ProductName { get; set; }
         public decimal OverallEstimatedCost { get; set; }
@@ -39,7 +39,7 @@ namespace POSIMSWebApi.Application.Dtos.ProductCost
         public int ProductId { get; set; }
     }
 
-    public class GetProductCostDto : GenericSearchParams
+    public class GetProductCostInput : GenericSearchParams
     {
         public bool? IsActive { get; set; }
     }

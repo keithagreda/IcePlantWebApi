@@ -10,6 +10,7 @@ using POSIMSWebApi.Application.Dtos.ProductCost;
 using POSIMSWebApi.Application.Dtos.ProductDtos;
 using POSIMSWebApi.Authentication;
 using POSIMSWebApi.QueryExtensions;
+using System.Linq;
 
 namespace POSIMSWebApi.Controllers
 {
@@ -48,28 +49,34 @@ namespace POSIMSWebApi.Controllers
                 );
         }
 
-        //[HttpGet("GetProductCosting")]
-        //[Authorize(Roles = UserRole.Admin)]
-        //public async Task<ActionResult<ApiResponse<PaginatedResult<GetProductCostingDto>>>> GetProductCosting([FromQuery] GenericSearchParams input)
-        //{
-        //    var query = _unitOfWork.ProductCost.GetQueryable()
-        //        .Include(e => e.ProductFk)
-        //        .Include(e => e.ProductCostDetails)
-        //        .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => false || e.ProductFk.Name.Contains(input.FilterText) || e.Name.Contains(input.FilterText))
-        //        .GroupBy(e => e.ProductFk.Name)
-        //        .Select(e => new GetProductCostingDto
-        //        {
-        //            ProductName = e.Key,
-        //            ProductCosting = e.GroupBy(e => e.Id).Select(e => e.Select(e => e.ProductCostDetails.))
-        //        });
+        [HttpGet("GetProductCosting")]
+        [Authorize(Roles = UserRole.Admin)]
+        public async Task<ActionResult<ApiResponse<PaginatedResult<GetProductCostingDto>>>> GetProductCosting([FromQuery] GenericSearchParams input)
+        {
+            var query = _unitOfWork.ProductCost.GetQueryable()
+                .Include(e => e.ProductFk)
+                .Include(e => e.ProductCostDetails)
+                .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => false 
+                || e.ProductFk.Name.Contains(input.FilterText) || e.Name.Contains(input.FilterText))
+                .GroupBy(e => e.ProductFk.Name)
+                .Select(e => new GetProductCostingDto
+                {
+                    ProductName = e.Key,
+                    ProductCosting = e.Select(e => new ProductCosting 
+                        {
+                            TotalEstimatedCost = e.ProductCostDetails.Select(e => e.ProductCostTotalAmount).Sum(),
+                            CostName = e.Name
+                        }).ToList(),
+                    OverallEstimatedCost = e.Select(e => e.ProductCostDetails.Select(e => e.ProductCostTotalAmount).Sum()).Sum()
+                });
 
-        //    var paginated = await query.ToPaginatedResult(input.PageNumber, input.PageSize).ToListAsync();
-        //    var count = await query.CountAsync();
+            var paginated = await query.ToPaginatedResult(input.PageNumber, input.PageSize).ToListAsync();
+            var count = await query.CountAsync();
 
-        //    return ApiResponse<PaginatedResult<ProductCostDto>>.Success(
-        //        new PaginatedResult<ProductCostDto>(paginated, count, (int)input.PageNumber, (int)input.PageSize)
-        //        );
-        //}
+            return ApiResponse<PaginatedResult<GetProductCostingDto>>.Success(
+                new PaginatedResult<GetProductCostingDto>(paginated, count, (int)input.PageNumber, (int)input.PageSize)
+                );
+        }
 
 
         /// <summary>

@@ -19,14 +19,17 @@ namespace Domain.Entities
     {
         public Guid Id { get; set; }
         public int? ProductCostId { get; set; }
+        //dapat naka multiply na daan ang qty og costing 
+        public decimal ProductCostTotalAmount { get; set; }
 
         [ForeignKey("ProductCostId")]
         public ProductCost ProductCost { get; set; }
 
-        public Guid? SalesHeaderId { get; set; }
+        public Guid? StocksReceivingId { get; set; }
 
-        [ForeignKey("SalesHeaderId")]
-        public SalesHeader SalesHeaderFk { get; set; }
+        [ForeignKey("StocksReceivingId")]
+        public StocksReceiving StocksReceivingFk { get; set; }
+
 
     }
 }

@@ -5,6 +5,7 @@ using Domain.Interfaces;
 using LanguageExt.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using POSIMSWebApi.Application.Dtos.Inventory;
 using POSIMSWebApi.Application.Dtos.Stocks;
 using POSIMSWebApi.Application.Dtos.StocksReceiving;
@@ -27,17 +28,20 @@ namespace POSIMSWebApi.Application.Services
         private readonly IMemoryCache _memoryCache;
         private readonly string _cacheKey = "Inventory";
         private readonly string _allInventory = "AllInventory";
+        private readonly ILogger<StocksReceivingService> _logger;
         public StocksReceivingService(IUnitOfWork unitOfWork,
             IStockDetailService stockDetailService,
             IInventoryService inventoryService,
             IMemoryCache memoryCache,
-            IMachineProductionService machineProductionService)
+            IMachineProductionService machineProductionService,
+            ILogger<StocksReceivingService> logger)
         {
             _unitOfWork = unitOfWork;
             _stockDetailService = stockDetailService;
             _inventoryService = inventoryService;
             _memoryCache = memoryCache;
             _machineProductionService = machineProductionService;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<string>> ReceiveStocks(CreateStocksReceivingDto input)
@@ -86,9 +90,41 @@ namespace POSIMSWebApi.Application.Services
                 Quantity = input.Quantity,
                 InventoryBeginningId = currentlyOpenedInv
             };
+            
 
             // Step 6: Save to the database
-            await _unitOfWork.StocksReceiving.AddAsync(stocksReceiving);
+            var stocksReceivingId = await _unitOfWork.StocksReceiving.InsertAndGetGuidAsync(stocksReceiving);
+
+            var productCost = _unitOfWork.ProductCost.GetQueryable().Where(e => e.IsActive == true).Select(e => new
+            {
+                e.ProductId,
+                e.Id,
+                e.Amount,
+            });
+
+
+            var productCostDetails = new List<ProductCostDetails>();
+            var currentProductCost = await productCost.Where(e => e.ProductId == input.ProductId).ToListAsync();
+            if (!currentProductCost.Any())
+            {
+                _logger.LogWarning("Warning! No Product Cost Has Been Setup On This Product!");
+            }
+            if (currentProductCost.Any())
+            {
+                foreach (var pc in currentProductCost)
+                {
+                    var productCostDetail = new ProductCostDetails
+                    {
+                        StocksReceivingId = stocksReceivingId,
+                        ProductCostId = pc.Id,
+                        ProductCostTotalAmount = pc.Amount * input.Quantity
+                    };
+                    productCostDetails.Add(productCostDetail);
+
+                }
+                await _unitOfWork.ProductCostDetail.AddRangeAsync(productCostDetails);
+            }
+            
             //create machine prod
             await _machineProductionService.CreateOrEdit(input.MachineId, currentlyOpenedInv, input.ProductId, input.Quantity, transNum);
 

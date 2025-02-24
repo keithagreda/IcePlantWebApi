@@ -196,19 +196,10 @@ namespace POSIMSWebApi.Application.Services
                 //Validation for product details
                 if (transDetails.Count <= 0)
                 {
-                    var error = new ArgumentNullException("Products can't be null",nameof(input.CreateSalesDetailV1Dto));
+                    var error = new ArgumentNullException("Products can't be null", nameof(input.CreateSalesDetailV1Dto));
                     return ApiResponse<string>.Fail(error.ToString());
                 }
 
-                //need to update this from previous sales creation
-
-                //var product = await _unitOfWork.Product.GetQueryable().Where(e => transDetails.Select(e => e.ProductId).Contains(e.Id))
-                //    .Select(e => new CreateProductSales
-                //{
-                //    Id = e.Id,
-                //    Name = e.Name,
-                //    Price = e.Price
-                //}).ToListAsync();
 
                 var transJoin = (from t in transDetails
                                  join p in _unitOfWork.Product.GetQueryable()
@@ -250,7 +241,7 @@ namespace POSIMSWebApi.Application.Services
                         customerId = await _unitOfWork.Customer.InsertAndGetGuidAsync(customer);
                     }
                     //lookup if existing
-                    if(existingCustomer is not null)
+                    if (existingCustomer is not null)
                     {
                         customerId = existingCustomer.Id;
                     }
@@ -258,27 +249,8 @@ namespace POSIMSWebApi.Application.Services
                     salesHeader.CustomerId = customerId;
                 }
 
-                var productCost = await _unitOfWork.ProductCost.GetQueryable().Where(e => e.IsActive == true).Select(e => new
-                {
-                    e.ProductId,
-                    e.Id
-                }).ToListAsync();
-
-                //if (customerId is not null)
-                //{
-                //    var customer = await _unitOfWork.Customer.FirstOrDefaultAsync(e => e.Id == input.CustomerId);
-
-                //    if (customer is null)
-                //    {
-                //        var error = new ValidationException("Error! Customer not found.");
-                //        return ApiResponse<string>.Fail(error.ToString());
-                //    }
-
-                //    salesHeader.CustomerId = customer.Id;
-                //}
-
                 var saleDetails = new List<SalesDetail>();
-                var productCostDetails = new List<ProductCostDetails>();
+                
                 //TO DO FIGURE OUT HOW TO DEDUCT QTY IF STOCKS ARE NOT ENOUGH
                 foreach (var item in transJoin)
                 {
@@ -300,26 +272,15 @@ namespace POSIMSWebApi.Application.Services
                     };
 
                     //create productCostDetail
-                    var currentProductCost = productCost.Where(e => e.ProductId == item.Id);
-                    var productCostDetail = new ProductCostDetails
-                    {
-                        SalesHeaderId = salesHeader.Id,
-                        ProductCostId = currentProductCost.Select(e => e.Id).FirstOrDefault()
-                    };
-
 
                     salesHeader.TotalAmount = salesHeader.TotalAmount += currAmount;
                     saleDetails.Add(saleDetail);
-                    productCostDetails.Add(productCostDetail);
                 }
-
-
 
                 //make a notification when discount is more than 30%
 
                 await _unitOfWork.SalesHeader.AddAsync(salesHeader);
                 await _unitOfWork.SalesDetail.AddRangeAsync(saleDetails);
-                await _unitOfWork.ProductCostDetail.AddRangeAsync(productCostDetails);
                 await _unitOfWork.CompleteAsync();
                 _cacheService.RemoveInventoryCache();
                 _memoryCache.Remove(_totalSalesKey);
@@ -330,75 +291,6 @@ namespace POSIMSWebApi.Application.Services
             {
                 return ApiResponse<string>.Fail(ex.Message);
             }
-            //if (input.SalesHeaderId is null)
-            //{
-            //    var error = new ValidationException("Error! SalesHeaderId Can't be null.");
-            //    return new Result<string>(error);
-            //    //return for now still haven't decided how to handle errors
-            //    //planning to make result pattern
-            //}
-
-            //var listOfProductIds = input.CreateSalesDetailDtos.Select(e => e.ProductId).ToList();
-
-            //var product = await _unitOfWork.Product.GetQueryable().Where(e => listOfProductIds.Contains(e.Id)).Select(e => new CreateProductSales
-            //{
-            //    Id = e.Id,
-            //    Name = e.Name,
-            //    Price = e.Price
-            //}).ToListAsync();
-
-            //if (product.Count <= 0)
-            //{
-            //    var error = new ValidationException("Error! Product not found!");
-            //    return new Result<string>(error);
-            //}
-
-            ////create sales header
-            //var salesHeader = new SalesHeader()
-            //{
-            //    Id = Guid.NewGuid(),
-            //    TotalAmount = 0,
-            //    TransNum = await GenerateTransNum()
-            //};
-
-            //if (input.CustomerId is not null)
-            //{
-            //    var customer = await _unitOfWork.Customer.FirstOrDefaultAsync(e => e.Id == input.CustomerId);
-
-            //    if (customer is null) 
-            //    {
-            //        var error = new ValidationException("Error! Customer not found.");
-            //        return new Result<string>(error);
-            //    }
-
-            //    salesHeader.CustomerId = customer.Id;
-            //}
-
-            ////figure out a way to deplete stocks based on batchnumber
-
-            //var salesDetails = new List<SalesDetail>();
-            //foreach (var sDetail in input.CreateSalesDetailDtos)
-            //{
-            //    var currProduct = product.FirstOrDefault(e => e.Id == sDetail.ProductId);
-            //    var currAmount = CalculateAmount(product, sDetail.ProductId, sDetail.Quantity);
-            //    var saleDetail = new SalesDetail
-            //    {
-            //        Id = Guid.NewGuid(),
-            //        ActualSellingPrice = sDetail.ActualSellingPrice,
-            //        Amount = currAmount,
-            //        Quantity = sDetail.Quantity,
-            //        ProductPrice = currProduct != null ? currProduct.Price : 0,
-            //        ProductId = sDetail.ProductId,
-            //        Discount = CalculateDiscount(sDetail.ActualSellingPrice, currAmount),
-            //        SalesHeaderId = salesHeader.Id
-            //    };
-            //    salesDetails.Add(saleDetail);
-            //}
-
-            //await _unitOfWork.SalesHeader.AddAsync(salesHeader);
-            //await _unitOfWork.SalesDetail.AddRangeAsync(salesDetails);
-            //_unitOfWork.Complete();
-            //return new Result<string>("Success!");
         }
 
         private async Task<string> GenerateTransNum()
