@@ -37,13 +37,14 @@ namespace POSIMSWebApi.Application.Dtos.Inventory
     public class GetStockCardDayDto
     {
         public Guid InventoryId { get; set; }
+        public DateTime DateTime { get; set; }
         public string Day { get; set; }
-        public int BegG { get; set; }
-        public int BegB { get; set; }
-        public int ReceivingG { get; set; }
-        public int ReceivingB { get; set; }
-        public int SalesG { get; set; }
-        public int SalesB { get; set; }
+        public decimal BegG { get; set; }
+        public decimal BegB { get; set; }
+        public decimal ReceivingG { get; set; }
+        public decimal ReceivingB { get; set; }
+        public decimal SalesG { get; set; }
+        public decimal SalesB { get; set; }
     }
 
     public class GetInvDetailsDto
@@ -106,6 +107,15 @@ namespace POSIMSWebApi.Application.Dtos.Inventory
         public DateTimeOffset? MinCreationTime { get; set; }
         public DateTimeOffset? MaxCreationTime { get; set; }
         public DateTimeOffset? MinClosedTime { get; set; }
+        public DateTimeOffset? MaxClosedTime { get; set; }
+    }
+
+    public class InventoryFilterV1 : PaginationParams
+    {
+        public string? ProductName { get; set; }
+        public DateTimeOffset? MinCreationTime { get; set; } = DateTimeOffset.Now.AddDays(-7);
+        public DateTimeOffset? MaxCreationTime { get; set; }
+        public DateTimeOffset? MinClosedTime { get; set; } = DateTimeOffset.Now;
         public DateTimeOffset? MaxClosedTime { get; set; }
     }
 

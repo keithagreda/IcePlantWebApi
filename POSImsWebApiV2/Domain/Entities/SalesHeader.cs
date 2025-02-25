@@ -18,7 +18,7 @@ namespace Domain.Entities
         public Guid? InventoryBeginningId { get; set; }
         [ForeignKey("InventoryBeginningId")]
         public InventoryBeginning InventoryBeginningFk { get; set; }
-        public bool IsReconciled { get; set; }
+        //public bool IsReconciled { get; set; }
 
     }
 }

@@ -54,6 +54,21 @@ namespace POSIMSWebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        
+        [HttpGet("GetStockCard")]
+        public async Task<ActionResult<ApiResponse<PaginatedResult<GetStockCardDayDto>>>> GetStockCard([FromQuery] InventoryFilterV1 input)
+        {
+            try
+            {
+
+                var data = await _inventoryService.GetStockCard(input);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
         [HttpPost("BeginningEntry")]

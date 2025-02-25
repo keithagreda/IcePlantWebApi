@@ -122,13 +122,62 @@ namespace POSIMSWebApi.Application.Services
 
         private DateTimeOffset ConvertToUTC8(DateTimeOffset? date)
         {
-            if(date is null)
+            if (date is null)
             {
                 return DateTimeOffset.MinValue;
             }
             var notnullDate = (DateTimeOffset)date;
             var result = notnullDate.ToOffset(TimeSpan.FromHours(8));
             return result;
+        }
+
+        public async Task<ApiResponse<PaginatedResult<GetStockCardDayDto>>> GetStockCard(InventoryFilterV1 input)
+        {
+            var query = from ibd in _unitOfWork.InventoryBeginningDetails.GetQueryable()
+                        join ib in _unitOfWork.InventoryBeginning.GetQueryable() on ibd.InventoryBeginningId equals ib.Id
+                        join p in _unitOfWork.Product.GetQueryable() on ibd.ProductId equals p.Id
+                        group ibd by new { ibd.ProductId, ibd.InventoryBeginningId } into g
+                        select new
+                        {
+                            InventoryId = g.Key.InventoryBeginningId,
+                            ProductId = g.Key.ProductId,
+                            ProductName = g.Select(x => x.ProductFK.Name).FirstOrDefault(),
+                            InventoryBegTime = g.Select(x => x.InventoryBeginningFk.CreationTime).FirstOrDefault(),
+                            InventoryEndTime = g.Select(x => x.InventoryBeginningFk.TimeClosed).FirstOrDefault(),
+                            BegQty = g.Sum(x => x.Qty),
+                            SalesQty = _unitOfWork.SalesDetail.GetQueryable()
+                                          .Include(e => e.SalesHeaderFk)
+                                          .Where(e => e.SalesHeaderFk.InventoryBeginningId == g.Key.InventoryBeginningId
+                                          && e.ProductId == g.Key.ProductId).Count() != 0 ? _unitOfWork.SalesDetail.GetQueryable()
+                                          .Include(e => e.SalesHeaderFk)
+                                          .Where(e => e.SalesHeaderFk.InventoryBeginningId == g.Key.InventoryBeginningId
+                                          && e.ProductId == g.Key.ProductId).Sum(e => e.Quantity) : 0m,
+                            ReceivedQty = _unitOfWork.StocksReceiving.GetQueryable().Include(e => e.StocksHeaderFk)
+                                          .Where(e => e.InventoryBeginningId == g.Key.InventoryBeginningId && e.StocksHeaderFk.ProductId == g.Key.ProductId)
+                                          .Count() != 0 ? _unitOfWork.StocksReceiving.GetQueryable().Include(e => e.StocksHeaderFk)
+                                          .Where(e => e.InventoryBeginningId == g.Key.InventoryBeginningId && e.StocksHeaderFk.ProductId == g.Key.ProductId)
+                                          .Sum(e => e.Quantity) : 0m
+                        };
+
+            var totalCount = await query.CountAsync();
+
+            var paginated = query.WhereIf(input.MinCreationTime is not null, e => e.InventoryBegTime >= ConvertToUTC8(input.MinCreationTime))
+                    .WhereIf(input.MaxClosedTime is not null, e => e.InventoryEndTime <= ConvertToUTC8(input.MaxClosedTime).AddHours(23).AddMinutes(59));
+            var grouped = await paginated.GroupBy(i => i.InventoryId)
+                .Select(e => new GetStockCardDayDto
+                {
+                    InventoryId = e.Key,
+                    DateTime = e.Select(e => e.InventoryBegTime).FirstOrDefault(),
+                    Day = e.Select(e => e.InventoryBegTime).FirstOrDefault().ToString("D"),
+                    BegG = e.Where(e => e.ProductId == 1).Select(e => e.BegQty).FirstOrDefault(),
+                    BegB = e.Where(e => e.ProductId == 2).Select(e => e.BegQty).FirstOrDefault(),
+                    SalesG = e.Where(e => e.ProductId == 1).Select(e => e.SalesQty).FirstOrDefault(),
+                    SalesB = e.Where(e => e.ProductId == 2).Select(e => e.SalesQty).FirstOrDefault(),
+                    ReceivingG = e.Where(e => e.ProductId == 1).Select(e => e.ReceivedQty).FirstOrDefault(),
+                    ReceivingB = e.Where(e => e.ProductId == 1).Select(e => e.ReceivedQty).FirstOrDefault()
+                }).OrderBy(e => e.DateTime).ToListAsync();
+            var result = new PaginatedResult<GetStockCardDayDto>(grouped, totalCount, (int)input.PageNumber, (int)input.PageSize);
+            return ApiResponse<PaginatedResult<GetStockCardDayDto>>.Success(result);
         }
 
         public async Task<ApiResponse<PaginatedResult<GetInventoryDto>>> GetAllInventory(InventoryFilter input)
@@ -172,7 +221,7 @@ namespace POSIMSWebApi.Application.Services
                     .ToListAsync();
 
 
-                var totalCount = beginningInventoryQuery.Count();
+                var totalCount = await beginningInventoryQuery.CountAsync();
 
                 var result = new PaginatedResult<GetInventoryDto>(paginatedQuery, totalCount, (int)input.PageNumber, (int)input.PageSize);
 
@@ -181,7 +230,7 @@ namespace POSIMSWebApi.Application.Services
 
                 return ApiResponse<PaginatedResult<GetInventoryDto>>.Success(result);
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
 
                 throw ex;
@@ -359,13 +408,13 @@ namespace POSIMSWebApi.Application.Services
 
         public async Task<ApiResponse<List<CurrentInventoryDto>>> GetCurrentStocks()
         {
-            if(!_memoryCache.TryGetValue(_cacheKey, out List<CurrentInventoryDto> join))
+            if (!_memoryCache.TryGetValue(_cacheKey, out List<CurrentInventoryDto> join))
             {
                 try
                 {
                     await sempahore.WaitAsync();
 
-                    if(!_memoryCache.TryGetValue(_cacheKey, out join))
+                    if (!_memoryCache.TryGetValue(_cacheKey, out join))
                     {
                         var getCurrentInventory = await _unitOfWork.InventoryBeginningDetails
                     .GetQueryable()
@@ -385,58 +434,58 @@ namespace POSIMSWebApi.Application.Services
                         TotalQuantity = g.Sum(e => e.Qty)
                     }).ToListAsync();
 
-                            if (getCurrentInventory.Count <= 0)
-                            {
-                                throw new ArgumentNullException("Invalid Action! There is no beginning inventory", nameof(getCurrentInventory));
-                            }
+                        if (getCurrentInventory.Count <= 0)
+                        {
+                            throw new ArgumentNullException("Invalid Action! There is no beginning inventory", nameof(getCurrentInventory));
+                        }
 
-                            // Received Stocks
-                            var receivedStocks = _unitOfWork.StocksReceiving.GetQueryable()
-                                .Include(e => e.StocksHeaderFk)
-                                .ThenInclude(e => e.ProductFK)
-                                .Include(e => e.InventoryBeginningFk)
-                                .Where(e => e.InventoryBeginningFk.Status == Domain.Enums.InventoryStatus.Open)
-                                .GroupBy(e => e.StocksHeaderFk.ProductId)
-                                .Select(group => new
+                        // Received Stocks
+                        var receivedStocks = _unitOfWork.StocksReceiving.GetQueryable()
+                            .Include(e => e.StocksHeaderFk)
+                            .ThenInclude(e => e.ProductFK)
+                            .Include(e => e.InventoryBeginningFk)
+                            .Where(e => e.InventoryBeginningFk.Status == Domain.Enums.InventoryStatus.Open)
+                            .GroupBy(e => e.StocksHeaderFk.ProductId)
+                            .Select(group => new
+                            {
+                                ProductId = group.Key,
+                                TotalQuantity = group.Sum(e => e.Quantity)
+                            }).ToList();
+
+                        // Sales Details
+                        var salesDetails = _unitOfWork.SalesDetail.GetQueryable()
+                            .Include(e => e.SalesHeaderFk.InventoryBeginningFk)
+                            .Where(e => e.SalesHeaderFk.InventoryBeginningFk.Status == Domain.Enums.InventoryStatus.Open)
+                            .GroupBy(e => e.ProductId)
+                            .Select(g => new
+                            {
+                                ProductId = g.Key,
+                                TotalQuantity = g.Sum(e => e.Quantity)
+                            });
+
+                        join = (from currInv in getCurrentInventory
+                                join recv in receivedStocks on currInv.ProductId equals recv.ProductId into recvGroup
+                                from recv in recvGroup.DefaultIfEmpty()
+                                join sales in salesDetails on currInv.ProductId equals sales.ProductId into salesGroup
+                                from sales in salesGroup.DefaultIfEmpty()
+                                select new CurrentInventoryDto
                                 {
-                                    ProductId = group.Key,
-                                    TotalQuantity = group.Sum(e => e.Quantity)
+                                    ProductName = currInv.ProductName,
+                                    ReceivedQty = recv != null ? recv.TotalQuantity : 0,
+                                    SalesQty = sales != null ? sales.TotalQuantity : 0,
+                                    BegQty = currInv.TotalQuantity,
+                                    CurrentStocks = (currInv != null ? currInv.TotalQuantity : 0) + (recv != null ? recv.TotalQuantity : 0) - (sales != null ? sales.TotalQuantity : 0)
                                 }).ToList();
 
-                            // Sales Details
-                            var salesDetails = _unitOfWork.SalesDetail.GetQueryable()
-                                .Include(e => e.SalesHeaderFk.InventoryBeginningFk)
-                                .Where(e => e.SalesHeaderFk.InventoryBeginningFk.Status == Domain.Enums.InventoryStatus.Open)
-                                .GroupBy(e => e.ProductId)
-                                .Select(g => new
-                                {
-                                    ProductId = g.Key,
-                                    TotalQuantity = g.Sum(e => e.Quantity)
-                                });
+                        var cacheOptions = new MemoryCacheEntryOptions()
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(30))
+                            .AddExpirationToken(new CancellationChangeToken(_cts.Token))
+                            .SetSize(1);
 
-                            join = (from currInv in getCurrentInventory
-                                    join recv in receivedStocks on currInv.ProductId equals recv.ProductId into recvGroup
-                                    from recv in recvGroup.DefaultIfEmpty()
-                                    join sales in salesDetails on currInv.ProductId equals sales.ProductId into salesGroup
-                                    from sales in salesGroup.DefaultIfEmpty()
-                                    select new CurrentInventoryDto
-                                    {
-                                        ProductName = currInv.ProductName,
-                                        ReceivedQty = recv != null ? recv.TotalQuantity : 0,
-                                        SalesQty = sales != null ? sales.TotalQuantity : 0,
-                                        BegQty = currInv.TotalQuantity,
-                                        CurrentStocks = (currInv != null ? currInv.TotalQuantity : 0) + (recv != null ? recv.TotalQuantity : 0) - (sales != null ? sales.TotalQuantity : 0)
-                                    }).ToList();
-
-                            var cacheOptions = new MemoryCacheEntryOptions()
-                                .SetSlidingExpiration(TimeSpan.FromMinutes(30))
-                                .AddExpirationToken(new CancellationChangeToken(_cts.Token))
-                                .SetSize(1);
-
-                            _memoryCache.Set(_cacheKey, join, cacheOptions);
+                        _memoryCache.Set(_cacheKey, join, cacheOptions);
                     }
                 }
-                finally 
+                finally
                 {
                     sempahore.Release();
                 }
@@ -460,7 +509,7 @@ namespace POSIMSWebApi.Application.Services
                 throw ex;
             }
         }
-        
+
         public async Task<Guid> CreateOrGetInventoryBeginning()
         {
             var checkIfInventoryIsOpen = await _unitOfWork.InventoryBeginning.FirstOrDefaultAsync(e => e.Status == InventoryStatus.Open);
@@ -667,7 +716,7 @@ namespace POSIMSWebApi.Application.Services
                         e.ProductFK.Id,
                         e.ProductFK.Name,
                     })
-                    .Select(g => new 
+                    .Select(g => new
                     {
                         ProductId = g.Key.Id,
                         ProductName = g.Key.Name,
@@ -737,7 +786,7 @@ namespace POSIMSWebApi.Application.Services
             var product = await _unitOfWork.Product.GetQueryable()
                 .Where(e => e.Id == input.ProductId).Select(e => e.Id).FirstOrDefaultAsync();
 
-            if(product == 0)
+            if (product == 0)
             {
                 throw new ArgumentNullException("Error! Product Not Found.", nameof(product));
             }
@@ -756,6 +805,6 @@ namespace POSIMSWebApi.Application.Services
             return "Success!";
         }
 
-        
+
     }
 }
