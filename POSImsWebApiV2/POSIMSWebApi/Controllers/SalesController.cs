@@ -115,11 +115,13 @@ namespace POSIMSWebApi.Controllers
         }
         [Authorize(Roles = UserRole.Admin + "," + UserRole.Owner)]
         [HttpGet("GetSalesSummary")]
-        public async Task<ActionResult<ApiResponse<PaginatedResult<SalesSummaryDto>>>> GetSalesSummary([FromQuery] GenericSearchParams input)
+        public async Task<ActionResult<ApiResponse<PaginatedResult<SalesSummaryWithEst>>>> GetSalesSummary([FromQuery] GenericSearchParams input)
         {
+            //having issues with projecting estimated cost since there is no connection between what is sold and what is being received
             var query = _unitOfWork.SalesDetail.GetQueryable()
                 .Include(e => e.SalesHeaderFk)
-                .ThenInclude(e => e.CustomerFk)
+                .ThenInclude(e => e.InventoryBeginningFk)
+                .Include(e => e.SalesHeaderFk.CustomerFk)
                 .Include(e => e.ProductFk)
                 .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => e.ProductFk.Name.Contains(input.FilterText))
                 .Select(e => new SalesSummaryDto
@@ -131,10 +133,15 @@ namespace POSIMSWebApi.Controllers
                     Quantity = e.Quantity,
                     Rate = e.ProductPrice,
                     TransNum = e.SalesHeaderFk.TransNum,
-                    TotalPrice = e.ActualSellingPrice != 0 ? e.ActualSellingPrice : e.Amount
+                    TotalPrice = e.ActualSellingPrice != 0 ? e.ActualSellingPrice : e.Amount,
+                    CurrentInventory = e.SalesHeaderFk.InventoryBeginningFk.Status
                 });
 
+            var dailySales = await query.Where(e => e.CurrentInventory == Domain.Enums.InventoryStatus.Open).SumAsync(e => e.TotalPrice);
+
             var result = await query.ToPaginatedResult(input.PageNumber, input.PageSize).OrderByDescending(e => e.DateTime).ToListAsync();
+            var totalSales = result.Sum(e => e.TotalPrice);
+
 
             foreach (var item in result)
             {
@@ -143,8 +150,23 @@ namespace POSIMSWebApi.Controllers
                 item.SoldBy = currUser?.UserName ?? "-";
             }
 
-            var res = new PaginatedResult<SalesSummaryDto>(result, await query.CountAsync(), (int)input.PageNumber, (int)input.PageSize);
-            return Ok(ApiResponse<PaginatedResult<SalesSummaryDto>>.Success(res));
+              var salesSumm = new SalesSummaryWithEst
+            {
+                DailySales = dailySales,
+                SalesSummaryDtos = result,
+                //TODO
+                TotalEstimatedCost = 0,
+                TotalSales = totalSales,
+            };
+
+            var resWithTotal = new List<SalesSummaryWithEst>
+            {
+                salesSumm
+            };
+
+
+            var res = new PaginatedResult<SalesSummaryWithEst>(resWithTotal, await query.CountAsync(), (int)input.PageNumber, (int)input.PageSize);
+            return Ok(ApiResponse<PaginatedResult<SalesSummaryWithEst>>.Success(res));
         }
 
         [Authorize(Roles = UserRole.Admin + "," + UserRole.Cashier + "," + UserRole.Owner)]

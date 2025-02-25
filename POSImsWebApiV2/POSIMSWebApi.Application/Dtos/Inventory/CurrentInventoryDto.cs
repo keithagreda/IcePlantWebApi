@@ -9,7 +9,7 @@ namespace POSIMSWebApi.Application.Dtos.Inventory
 {
     public class CurrentInventoryDto
     {
-        public string ProductName { get; set; }
+        public string? ProductName { get; set; }
         public decimal ReceivedQty { get; set; }
         public decimal SalesQty { get; set; }
         public decimal BegQty { get; set; }
@@ -20,7 +20,7 @@ namespace POSIMSWebApi.Application.Dtos.Inventory
     {
         public Guid? InventoryId { get; set; }
         public int ProductId { get; set; }
-        public string ProductName { get; set; }
+        public string? ProductName { get; set; }
         public decimal BegQty { get; set; }
         public decimal ReceivedQty { get; set; }
         public decimal SalesQty { get; set; }
@@ -28,11 +28,35 @@ namespace POSIMSWebApi.Application.Dtos.Inventory
         public DateTimeOffset? InventoryEndTime { get; set;}
     }
 
+    public class GetStockCard
+    {
+        public ICollection<GetStockCardDayDto> GetStockCardDayDtos { get; set; } = new List<GetStockCardDayDto>();
+        public DateTimeOffset? InventoryBegTime { get; set; }
+        public DateTimeOffset? InventoryEndTime { get; set; }
+    }
+    public class GetStockCardDayDto
+    {
+        public Guid InventoryId { get; set; }
+        public string Day { get; set; }
+        public int BegG { get; set; }
+        public int BegB { get; set; }
+        public int ReceivingG { get; set; }
+        public int ReceivingB { get; set; }
+        public int SalesG { get; set; }
+        public int SalesB { get; set; }
+    }
+
+    public class GetInvDetailsDto
+    {
+        public decimal GoodQuantity { get; set; }
+        public decimal BadQuantity { get; set; }
+    }
+
     public class GetInventoryV1Dto
     {
         public Guid InventoryId { get; set; }
         public int ProductId { get; set; }
-        public string ProductName { get; set; }
+        public string? ProductName { get; set; }
         public decimal BegQty { get; set; }
         public DateTimeOffset? InventoryBegTime { get; set; }
         public DateTimeOffset? InventoryEndTime { get; set; }
@@ -72,7 +96,7 @@ namespace POSIMSWebApi.Application.Dtos.Inventory
     {
         public Guid? InventoryId { get; set; }
         public int ProductId { get; set; }
-        public string ProductName { get; set; }
+        public string? ProductName { get; set; }
         public decimal TotalQuantity { get; set; }
     }
 

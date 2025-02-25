@@ -292,6 +292,14 @@ namespace POSIMSWebApi.Application.Services
                 return ApiResponse<string>.Fail(ex.Message);
             }
         }
+        /// <summary>
+        /// re calculate sales header and set sales header to is reconciled;
+        /// </summary>
+        /// <returns></returns>
+        //public async Task<ApiResponse<>> ReconcileSalesHeader(Guid salesDetailId)
+        //{
+         
+        //}
 
         private async Task<string> GenerateTransNum()
         {

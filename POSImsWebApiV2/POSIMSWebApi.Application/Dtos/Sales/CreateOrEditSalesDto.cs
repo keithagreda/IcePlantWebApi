@@ -1,4 +1,5 @@
-﻿using POSIMSWebApi.Application.Dtos.Pagination;
+﻿using Domain.Enums;
+using POSIMSWebApi.Application.Dtos.Pagination;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,7 +14,7 @@ namespace POSIMSWebApi.Application.Dtos.Sales
         public Guid? SalesHeaderId { get; set; }
         public Guid? CustomerId { get; set; }
         [Required]
-        public List<CreateSalesDetailDto> CreateSalesDetailDtos { get; set; }
+        public List<CreateSalesDetailDto> CreateSalesDetailDtos { get; set; } = new List<CreateSalesDetailDto>();
     }
 
     public class FilterSales : PaginationParams
@@ -27,7 +28,7 @@ namespace POSIMSWebApi.Application.Dtos.Sales
     {
         public Guid Id { get; set; }
         public decimal TotalAmount { get; set; }
-        public string TransNum { get; set; }
+        public string? TransNum { get; set; }
         public string TransactionDate { get; set; }
         public string SoldBy { get; set; }
         public string CustomerName { get; set; }
@@ -47,13 +48,24 @@ namespace POSIMSWebApi.Application.Dtos.Sales
     public class SalesSummaryDto
     {
         public string CustomerName { get; set; }
-        public string SoldBy { get; set; }
-        public string TransNum { get; set; }
+        public string? SoldBy { get; set; }
+        public string? TransNum { get; set; }
         public DateTimeOffset DateTime { get; set; }
         public string ProductName { get; set; }
         public decimal Quantity { get; set; }
         public decimal Rate { get; set; }
         public decimal TotalPrice { get; set; }
+        public InventoryStatus CurrentInventory { get; set; }
+    }
+
+    public class SalesSummaryWithEst
+    {
+        //purpose of this is to total the sales based on the filter
+        public decimal TotalSales { get; set; }
+        //sales based on inventory opening and closing
+        public decimal DailySales { get; set; }
+        public decimal TotalEstimatedCost { get; set; }
+        public ICollection<SalesSummaryDto> SalesSummaryDtos { get; set; } = new List<SalesSummaryDto>();
     }
 
 }

@@ -12,5 +12,8 @@ namespace Domain.Entities
         [ForeignKey("RemarksId")]
         public Remarks RemarksFk { get; set; }
 
+        public Guid InventoryBeginningId { get; set; }
+        [ForeignKey("InventoryBeginningId")]
+        public InventoryBeginning InventoryBeginningFk { get; set; }
     }
 }

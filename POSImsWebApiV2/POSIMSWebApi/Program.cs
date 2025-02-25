@@ -63,6 +63,9 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<IMachineProductionService, MachineProductionService>();
 builder.Services.AddScoped<IProductCostDetailService, ProductCostDetailService>();
+builder.Services.AddScoped<IRemarksService, RemarksService>();
+builder.Services.AddScoped<IStocksReconciliationService, StocksReconciliationService>();
+
 builder.Services.AddScoped<SoftDeleteInterceptor>();
 builder.Services.AddScoped<AuditInterceptor>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

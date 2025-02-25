@@ -26,4 +26,10 @@ namespace Domain.Enums
         Sales = 2,
         Damage = 3,
     }
+
+    public enum TransactionTypeEnum
+    {
+        Receiving = 0,
+        Sales = 1,
+    }
 }
