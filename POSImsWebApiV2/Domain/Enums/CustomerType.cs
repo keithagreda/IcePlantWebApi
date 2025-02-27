@@ -12,24 +12,4 @@ namespace Domain.Enums
         Distributor = 1,
         Supplier = 2
     }
-
-    public enum InventoryStatus
-    {
-        Open = 0,
-        Closed = 1
-    }
-
-    public enum TransactionEnum
-    {
-        Receiving = 0,
-        Return = 1,
-        Sales = 2,
-        Damage = 3,
-    }
-
-    public enum TransactionTypeEnum
-    {
-        Receiving = 0,
-        Sales = 1,
-    }
 }

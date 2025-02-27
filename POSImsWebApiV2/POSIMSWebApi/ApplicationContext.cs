@@ -148,6 +148,9 @@ namespace POSIMSWebApi
         public DbSet<Credit> Credits { get; set; }
         public DbSet<ProductCost> ProductCosts { get; set; }
         public DbSet<ProductCostDetails> ProductCostDetails { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<ReportDetail> ReportDetails { get; set; }
+        public DbSet<Expense> Expenses { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())

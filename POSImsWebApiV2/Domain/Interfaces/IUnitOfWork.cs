@@ -28,6 +28,11 @@ namespace Domain.Interfaces
         ICreditRepository Credit { get; }
         IProductCostRepository ProductCost { get; }
         IProductCostDetailsRepository ProductCostDetail { get; }
+
+        IReportRepository Report { get;  }
+        IReportDetailRepository ReportDetail { get;  }
+        IExpenseRepository Expense { get;  }
+
         int Complete();
         Task<int> CompleteAsync();
         IQueryable<T> ExecuteRawQuery<T>(string sql, object parameters = null);

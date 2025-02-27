@@ -38,6 +38,9 @@ namespace POSIMSWebApi.UnitOfWorks
             Credit = new CreditRepository(_context);
             ProductCost = new ProductCostRepository(_context);
             ProductCostDetail = new ProductCostDetailsRepository(_context);
+            Report = new ReportRepository(_context);
+            ReportDetail = new ReportDetailRepository(_context);
+            Expense = new ExpenseRepository(_context);
         }
         public ISalesHeaderRepository SalesHeader { get; private set; }
         public ISalesDetailRepository SalesDetail { get; private set; }
@@ -59,6 +62,10 @@ namespace POSIMSWebApi.UnitOfWorks
         public ICreditRepository Credit { get; private set; }
         public IProductCostRepository ProductCost { get; private set; }
         public IProductCostDetailsRepository ProductCostDetail { get; private set; }
+        public IReportRepository Report { get; private set; }
+        public IReportDetailRepository ReportDetail { get; private set; }
+        public IExpenseRepository Expense { get; private set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
