@@ -1,4 +1,5 @@
 ﻿using Domain.ApiResponse;
+using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -30,21 +31,8 @@ namespace POSIMSWebApi.Application.Services
         {
             try
             {
-                //check if existing 
-                //TO DO!! MAKE THIS DYNAMIC
-                var existing = await _unitOfWork.Report.GetQueryable().AnyAsync(e => e.DateGenerated.Month == date.Month);
-                if (existing)
-                {
-                    //make a response that the report already exists
-                    return ApiResponse<ViewGeneratedReportDto>.Fail("Something went wrong while generating reports...");
-                }
-                //generate month now for 
-                //generate report
-                //MUST INCLUDE VERY FIRST BEG QTY
-
-                // 1️⃣ Fetch Sales Data Once
-                // 1️⃣ Fetch Sales Data as IQueryable (Deferred Execution)
-                var salesDataQuery = _unitOfWork.SalesDetail.GetQueryable()
+                // Generate sales data query
+                var salesDataQuery = await _unitOfWork.SalesDetail.GetQueryable()
                     .Include(sd => sd.SalesHeaderFk)
                     .ThenInclude(sh => sh.InventoryBeginningFk)
                     .Where(e => e.SalesHeaderFk.InventoryBeginningFk.CreationTime.Month == date.Month)
@@ -54,10 +42,10 @@ namespace POSIMSWebApi.Application.Services
                         ProductId = g.Key,
                         TotalQtySold = g.Sum(sd => sd.Quantity),
                         TotalSales = g.Sum(sd => sd.Amount)
-                    });
+                    }).ToListAsync();
 
-                // 2️⃣ Fetch Stock Receiving Data as IQueryable
-                var stockReceivingDataQuery = _unitOfWork.StocksReceiving.GetQueryable()
+                // Fetch stock receiving data as IQueryable
+                var stockReceivingDataQuery = await _unitOfWork.StocksReceiving.GetQueryable()
                     .Include(sr => sr.StocksHeaderFk)
                     .Include(e => e.InventoryBeginningFk)
                     .Where(e => e.InventoryBeginningFk.CreationTime.Month == date.Month)
@@ -66,63 +54,154 @@ namespace POSIMSWebApi.Application.Services
                     {
                         ProductId = g.Key,
                         TotalQtyGenerated = g.Sum(sr => sr.Quantity)
-                    });
+                    }).ToListAsync();
 
-                // 3️⃣ Main Query: Keep Sales & Stock Queries as Subqueries
-                var query = from ibd in _unitOfWork.InventoryBeginningDetails.GetQueryable()
-                            join ib in _unitOfWork.InventoryBeginning.GetQueryable()
-                                on ibd.InventoryBeginningId equals ib.Id
-                            join p in _unitOfWork.Product.GetQueryable()
-                                on ibd.ProductId equals p.Id
-                            where ib.CreationTime.Month == date.Month
-                            group new { ibd, p } by new { ibd.ProductId } into g
-                            select new ViewProductGeneratedReportDto
+                // Fetch estimated cost data
+                var estimatedCost = await _unitOfWork.ProductCost.GetQueryable()
+                    .Include(e => e.ProductCostDetails)
+                    .ThenInclude(e => e.StocksReceivingFk)
+                    .ThenInclude(e => e.InventoryBeginningFk)
+                    .Where(e => e.IsActive == true && e.ProductCostDetails.Select(e => e.StocksReceivingFk.InventoryBeginningFk.CreationTime.Month).Contains(date.Month))
+                    .GroupBy(e => new { e.ProductId, e.Name })
+                    .Select(e => new
+                    {
+                        e.Key.ProductId,
+                        CostName = e.Key.Name,
+                        TotalCost = e.Select(e => e.ProductCostDetails.Sum(e => e.ProductCostTotalAmount)).Sum()
+                    }).ToListAsync();
+
+                var inventories = await _unitOfWork.InventoryBeginningDetails.GetQueryable()
+                    .Include(e => e.InventoryBeginningFk)
+                    .Include(e => e.ProductFK)
+                    .Where(e => e.InventoryBeginningFk.CreationTime.Month == date.Month)
+                    .GroupBy(e => e.ProductId)
+                    .Select(e => new
+                    {
+                        e.Key,
+                    }).ToListAsync();
+
+                // Step 1: Aggregate estimated cost per product
+                var estimatedCostData = estimatedCost
+                    .GroupBy(e => e.ProductId)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => new ViewProdEstCosting
+                        {
+                            OverallTotalCost = g.Sum(e => e.TotalCost),
+                            ViewProdEstCostingDetails = g.Select(e => new ViewProdEstCostingDetails
                             {
-                                ProductId = g.Key.ProductId,
-                                    ProductName = g.Select(e => e.p.Name).FirstOrDefault() ?? "",  // Use product name from join
-                                    Sales = new ViewProdGenSales
-                                    {
-                                        TotalQtySold = salesDataQuery
-                                            .Where(s =>  s.ProductId == g.Key.ProductId)
-                                            .Select(s => s.TotalQtySold)
-                                            .FirstOrDefault(),  // Use query instead of materializing
+                                CostName = e.CostName,
+                                TotalCost = e.TotalCost
+                            }).ToList()
+                        });
 
-                                        TotalSales = salesDataQuery
-                                            .Where(s => s.ProductId == g.Key.ProductId)
-                                            .Select(s => s.TotalSales)
-                                            .FirstOrDefault()
-                                    },
-                                    Generation = new ViewProdGenRecv
-                                    {
-                                        TotalQtyGenerated = stockReceivingDataQuery
-                                            .Where(sr => sr.ProductId == g.Key.ProductId)
-                                            .Select(sr => sr.TotalQtyGenerated)
-                                            .FirstOrDefault(),
+                var stockReceivingData = stockReceivingDataQuery
+                    .ToDictionary(
+                        sr => sr.ProductId,
+                        sr => new ViewProdGenRecv
+                        {
+                            TotalQtyGenerated = sr.TotalQtyGenerated,
+                            AverageGeneration = sr.TotalQtyGenerated // Modify if you need actual average calculation
+                        });
 
-                                        AverageGeneration = stockReceivingDataQuery
-                                            .Where(sr =>  sr.ProductId == g.Key.ProductId)
-                                            .Select(sr => sr.TotalQtyGenerated / DateTime.DaysInMonth(date.Year, date.Month))
-                                            .FirstOrDefault()
-                                    }
-                            };
+                var salesData = salesDataQuery
+                    .ToDictionary(
+                        s => s.ProductId,
+                        s => new ViewProdGenSales
+                        {
+                            TotalQtySold = s.TotalQtySold,
+                            TotalSales = s.TotalSales
+                        });
 
+                var allProductIds = salesData.Keys
+                    .Union(stockReceivingData.Keys)
+                    .Union(estimatedCostData.Keys)
+                    .ToList();
+
+                var productReports = allProductIds.Select(productId => new ViewProductGeneratedReportDto
+                {
+                    ProductId = productId,
+                    ProductName = inventories.FirstOrDefault(i => i.Key == productId)?.Key.ToString() ?? "Unknown Product", // Adjust logic based on your schema
+                    Sales = salesData.ContainsKey(productId) ? salesData[productId] : null,
+                    Generation = stockReceivingData.ContainsKey(productId) ? stockReceivingData[productId] : null,
+                    EstCosting = estimatedCostData.ContainsKey(productId) ? estimatedCostData[productId] : null
+                }).ToList();
+
+                // Step 6: Compute report-level totals
                 var result = new ViewGeneratedReportDto
                 {
-                    DateGenerated = date,
-                    TotalExpenses = 0,  // TO DO: Fetch Expenses,
-                    TotalSales = await query.SumAsync(e => e.Sales.TotalSales),
-                    ViewProductGeneratedReportDtos = await query.AsNoTracking().ToListAsync()
+                    DateGenerated = DateTime.UtcNow,
+                    TotalSales = productReports.Sum(p => p.Sales?.TotalSales ?? 0),
+                    TotalExpenses = productReports.Sum(p => p.EstCosting?.OverallTotalCost ?? 0), // Assuming expenses = estimated cost
+                    TotalEstimatedCost = productReports.Sum(p => p.EstCosting?.OverallTotalCost ?? 0), // Modify if needed
+                    ViewProductGeneratedReportDtos = productReports
                 };
+
+
+                //// Main query: Keep sales & stock queries as subqueries
+                //var query = from ibd in _unitOfWork.InventoryBeginningDetails.GetQueryable()
+                //            join ib in _unitOfWork.InventoryBeginning.GetQueryable()
+                //                on ibd.InventoryBeginningId equals ib.Id
+                //            join p in _unitOfWork.Product.GetQueryable()
+                //                on ibd.ProductId equals p.Id
+                //            where ib.CreationTime.Month == date.Month
+                //            group new { ibd, p } by new { ibd.ProductId } into g
+                //            select new ViewProductGeneratedReportDto
+                //            {
+                //                ProductId = g.Key.ProductId,
+                //                ProductName = g.Select(e => e.p.Name).FirstOrDefault() ?? "",  // Use product name from join
+                //                Sales = new ViewProdGenSales
+                //                {
+                //                    TotalQtySold = salesDataQuery
+                //                            .Where(s => s.ProductId == g.Key.ProductId)
+                //                            .Select(s => s.TotalQtySold)
+                //                            .FirstOrDefault(),  // Use query instead of materializing
+
+                //                    TotalSales = salesDataQuery
+                //                            .Where(s => s.ProductId == g.Key.ProductId)
+                //                            .Select(s => s.TotalSales)
+                //                            .FirstOrDefault()
+                //                },
+                //                Generation = new ViewProdGenRecv
+                //                {
+                //                    TotalQtyGenerated = stockReceivingDataQuery
+                //                            .Where(sr => sr.ProductId == g.Key.ProductId)
+                //                            .Select(sr => sr.TotalQtyGenerated)
+                //                            .FirstOrDefault(),
+
+                //                    AverageGeneration = stockReceivingDataQuery
+                //                            .Where(sr => sr.ProductId == g.Key.ProductId)
+                //                            .Select(sr => sr.TotalQtyGenerated / DateTime.DaysInMonth(date.Year, date.Month))
+                //                            .FirstOrDefault()
+                //                },
+                //                EstCosting = new ViewProdEstCosting
+                //                {
+                //                    OverallTotalCost = 0,
+                //                    ViewProdEstCostingDetails = estimatedCost.Where(e => e.ProductId == g.Key.ProductId)
+                //                                                .Select(e => new ViewProdEstCostingDetails
+                //                                                {
+                //                                                    CostName = e.CostName ?? "",
+                //                                                    TotalCost = e.TotalCost
+                //                                                }).ToList() ?? new List<ViewProdEstCostingDetails>()
+                //                }
+                //            };
+
+                //var result = new ViewGeneratedReportDto
+                //{
+                //    DateGenerated = date,
+                //    TotalExpenses = 0,  // TO DO: Fetch Expenses,
+                //    TotalSales = await query.SumAsync(e => e.Sales.TotalSales),
+                //    ViewProductGeneratedReportDtos = await query.AsNoTracking().ToListAsync()
+                //};
                 if (result is null)
                 {
                     return ApiResponse<ViewGeneratedReportDto>.Fail("Something went wrong while generating reports...");
                 }
                 return ApiResponse<ViewGeneratedReportDto>.Success(result);
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
-
-                return ApiResponse<ViewGeneratedReportDto>.Fail("Something went wrong."  + ex.Message.ToString());
+                return ApiResponse<ViewGeneratedReportDto>.Fail("Something went wrong. " + ex.Message.ToString());
             }
             ////get sales for the month for each product
             //var sales = _unitOfWork.SalesHeader.GetQueryable()
@@ -171,9 +250,19 @@ namespace POSIMSWebApi.Application.Services
         /// a function that saves the generated report
         /// </summary>
         /// <returns></returns>
-        //public async Task<ApiResponse<int>> SaveReport()
+        //public async Task<ApiResponse<int>> SaveReport(ViewGeneratedReportDto input)
         //{
+        //    var report = new Report
+        //    {
+        //        DateGenerated = input.DateGenerated,
+        //        TotalSales = input.TotalSales,
+        //        TotalExpenses = input.TotalExpenses,
+        //        TotalEstimatedCost = input.estcost
+        //    }
 
-        //} 
+        //    var reportDetails = new List<ReportDetail>();
+
+        //}
     }
+
 }

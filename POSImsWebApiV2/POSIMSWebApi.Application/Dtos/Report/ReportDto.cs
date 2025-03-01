@@ -24,6 +24,7 @@ namespace POSIMSWebApi.Application.Dtos.Report
         public DateTime DateGenerated { get; set; }
         public decimal TotalSales { get; set; }
         public decimal TotalExpenses { get; set; }
+        public decimal TotalEstimatedCost { get; set; }
         public ICollection<ViewProductGeneratedReportDto> ViewProductGeneratedReportDtos { get; set; }
     }
 
@@ -31,9 +32,9 @@ namespace POSIMSWebApi.Application.Dtos.Report
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; }
-        public ViewProdGenSales Sales { get; set; }
-        public ViewProdGenRecv Generation { get; set; }
-        public ViewProdEstCosting EstCosting { get; set; }
+        public ViewProdGenSales? Sales { get; set; }
+        public ViewProdGenRecv? Generation { get; set; }
+        public ViewProdEstCosting? EstCosting { get; set; }
 
     }
 
@@ -53,7 +54,7 @@ namespace POSIMSWebApi.Application.Dtos.Report
     public class ViewProdEstCosting
     {
         public decimal OverallTotalCost { get; set; }
-        public ICollection<ViewProdEstCostingDetails> ViewProdEstCostingDetails { get; set; }
+        public ICollection<ViewProdEstCostingDetails> ViewProdEstCostingDetails { get; set; } = new List<ViewProdEstCostingDetails>();
     }
 
     public class ViewProdEstCostingDetails
