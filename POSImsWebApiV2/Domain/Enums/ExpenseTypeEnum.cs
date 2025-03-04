@@ -4,6 +4,7 @@
     {
         Electricity,
         Water,
-        Labor
+        Labor,
+        Salary
     }
 }

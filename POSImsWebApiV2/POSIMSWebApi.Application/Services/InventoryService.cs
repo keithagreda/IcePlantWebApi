@@ -174,7 +174,7 @@ namespace POSIMSWebApi.Application.Services
                     SalesG = e.Where(e => e.ProductId == 1).Select(e => e.SalesQty).FirstOrDefault(),
                     SalesB = e.Where(e => e.ProductId == 2).Select(e => e.SalesQty).FirstOrDefault(),
                     ReceivingG = e.Where(e => e.ProductId == 1).Select(e => e.ReceivedQty).FirstOrDefault(),
-                    ReceivingB = e.Where(e => e.ProductId == 1).Select(e => e.ReceivedQty).FirstOrDefault()
+                    ReceivingB = e.Where(e => e.ProductId == 2).Select(e => e.ReceivedQty).FirstOrDefault()
                 }).OrderBy(e => e.DateTime).ToListAsync();
             var result = new PaginatedResult<GetStockCardDayDto>(grouped, totalCount, (int)input.PageNumber, (int)input.PageSize);
             return ApiResponse<PaginatedResult<GetStockCardDayDto>>.Success(result);

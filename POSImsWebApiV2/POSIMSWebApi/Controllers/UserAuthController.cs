@@ -35,5 +35,13 @@ namespace POSIMSWebApi.Controllers
             var result = await _userAuthServices.RegisterUser(input);
             return Ok(result);
         }
+
+        [HttpPost("AuthenticateUser")]
+        public async Task<ActionResult<ApiResponse<string>>> AuthenticateUser([FromBody]LoginUserDto login)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var result = await _userAuthServices.AuthenticateUser(login);
+            return Ok(result);
+        }
     }
 }

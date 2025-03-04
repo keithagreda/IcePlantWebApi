@@ -8,6 +8,7 @@ namespace Domain.Entities
         public Guid Id { get; set; }
         public ExpenseTypeEnum ExpenseType { get; set; }
         public decimal Amount { get; set; }
+        public string Description { get; set; }
 
         // Navigation Property
         public Guid ReportId { get; set; }

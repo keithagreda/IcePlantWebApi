@@ -228,6 +228,22 @@ namespace POSIMSWebApi.Authentication.Services
             }
         }
 
+        public async Task<ApiResponse<string>> AuthenticateUser(LoginUserDto login)
+        {
+            var user = await _userManager.FindByNameAsync(login.UserName);
+            if(user is null)
+            {
+                return ApiResponse<string>.Fail("Username is not valid!");
+            }
+            var authenticate = await _userManager.CheckPasswordAsync(user, login.Password);
+            if(authenticate == false)
+            {
+                return ApiResponse<string>.Fail("Wrong password.");
+            }
+
+            return ApiResponse<string>.Success("Successfully authenticated user!");
+        }
+
         public int GetCurrentUserId()
         {
             var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);

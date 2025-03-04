@@ -203,66 +203,72 @@ namespace POSIMSWebApi.Application.Services
             {
                 return ApiResponse<ViewGeneratedReportDto>.Fail("Something went wrong. " + ex.Message.ToString());
             }
-            ////get sales for the month for each product
-            //var sales = _unitOfWork.SalesHeader.GetQueryable()
-            //    .Include(e => e.SalesDetails)
-            //    .ThenInclude(e => e.ProductFk)
-            //    .Where(e => e.CreationTime.Month == date.Month)
-            //    .GroupBy(e => e.SalesDetails.Select(e => e.ProductFk.Name))
-            //    .Select(e => new
-            //    {
-            //        ProductName = e.Key,
-            //        Quantity = e.Sum(e => e.SalesDetails.Sum(e => e.Quantity)),
-            //        Total = e.Sum(e => e.SalesDetails.Sum(e => e.Amount))
-            //    });
 
-            ////get product generation for the month
-
-
-            //var receive = _unitOfWork.StocksReceiving.GetQueryable()
-            //    .Include(e => e.StocksHeaderFk)
-            //    .ThenInclude(e => e.ProductFK)
-            //    .Where(e => e.CreationTime.Month == date.Month)
-            //    .GroupBy(e => e.StocksHeaderFk.ProductFK.Name)
-            //    .Select(e => new
-            //    {
-            //        ProductName = e.Key,
-            //        Quantity = e.Sum(e => e.Quantity),
-            //        AverageDailyGeneration = e.Where(e => e.CreationTime.Month == date.Month).Select(e => e.Quantity).Sum() / DateTime.DaysInMonth(date.Year, date.Month)
-            //    });
-
-            ////get product cost for estimation
-            //var productCost = _unitOfWork.ProductCost.GetQueryable()
-            //    .Include(e => e.ProductFk)
-            //    .Include(e => e.ProductCostDetails)
-            //    .Where(e => e.CreationTime.Month == date.Month)
-            //    .GroupBy(e => new { ProductName = e.ProductFk.Name , e.Name})
-            //    .Select(e => new
-            //    {
-            //        CostName = e.Key.Name,
-            //        ProductName = e.Key.ProductName,
-            //        Cost = e.Sum(e => e.ProductCostDetails.Sum(e => e.ProductCostTotalAmount))
-            //    });
-
-            //return report
+            
         }
+
         /// <summary>
         /// a function that saves the generated report
         /// </summary>
         /// <returns></returns>
-        //public async Task<ApiResponse<int>> SaveReport(ViewGeneratedReportDto input)
-        //{
-        //    var report = new Report
-        //    {
-        //        DateGenerated = input.DateGenerated,
-        //        TotalSales = input.TotalSales,
-        //        TotalExpenses = input.TotalExpenses,
-        //        TotalEstimatedCost = input.estcost
-        //    }
+        public async Task<ApiResponse<string>> SaveReport(ViewGeneratedReportDto input)
+        {
+            var isOpen = await CheckIfInventoryStillOpen(input.DateGenerated);
+            if (isOpen) return ApiResponse<string>.Fail("Invalid Action! Inventory is still open! Please close before proceeding.");
 
-        //    var reportDetails = new List<ReportDetail>();
+            var from = new DateTime(input.DateGenerated.Year, input.DateGenerated.Month, 1);
+            var to = new DateTime(input.DateGenerated.Year, input.DateGenerated.Month, DateTime.DaysInMonth(input.DateGenerated.Year, input.DateGenerated.Month));
 
-        //}
+            var reportDetails = new List<ReportDetail>();
+            var report = new Report
+            {
+                Id = Guid.NewGuid(),
+                DateGenerated = input.DateGenerated,
+                TotalSales = input.TotalSales,
+                TotalExpenses = input.TotalExpenses,
+                TotalEstimatedCost = input.TotalEstimatedCost,
+                From = from,
+                To = to
+                
+            };
+            foreach (var item in input.ViewProductGeneratedReportDtos)
+            {
+                var res = new ReportDetail
+                {
+                    ReportId = report.Id,
+                    ProductId = item.ProductId,
+                    AverageGeneration = item.Generation?.AverageGeneration ?? 0m,
+                    TotalQtySold = item.Sales?.TotalQtySold ?? 0m,
+                    TotalSales = item.Sales?.TotalSales ?? 0m,
+                    TotalQtyGenerated = item.Generation?.TotalQtyGenerated ?? 0m,
+                    TotalEstimatedCost = item.EstCosting?.OverallTotalCost ?? 0m
+                };
+                reportDetails.Add(res);
+            }
+
+            if (!reportDetails.Any())
+            {
+                return ApiResponse<string>.Fail("Error! Something went wrong while saving report!");
+            }
+
+            await _unitOfWork.Report.AddAsync(report);
+            await _unitOfWork.ReportDetail.AddRangeAsync(reportDetails);
+            return ApiResponse<string>.Success("Successfully saved report!");
+        }
+
+        public async Task<ApiResponse<string>> CloseReport(Guid reportId)
+        {
+            var report = await _unitOfWork.Report.FirstOrDefaultAsync(e => e.Id == reportId);
+            report.IsClosed = true;
+            await _unitOfWork.CompleteAsync();
+            return ApiResponse<string>.Success("Successfully Closed Report!");
+        }
+
+        private async Task<bool> CheckIfInventoryStillOpen(DateTime dateGenerated)
+        {
+            return await _unitOfWork.InventoryBeginning.GetQueryable()
+                .AnyAsync(e => e.CreationTime.Month == dateGenerated.Month && e.Status == InventoryStatus.Open);
+        }
     }
 
 }

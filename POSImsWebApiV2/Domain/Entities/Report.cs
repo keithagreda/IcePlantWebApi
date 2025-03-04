@@ -9,6 +9,7 @@
         public decimal TotalExpenses { get; set; }
         public DateTime From { get; set; }
         public DateTime To { get; set; }
+        public bool IsClosed { get; set; }
 
         // Navigation Properties
         public ICollection<ReportDetail> ReportDetails { get; set; } = new List<ReportDetail>();

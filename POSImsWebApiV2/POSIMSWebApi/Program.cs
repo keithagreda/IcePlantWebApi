@@ -85,6 +85,9 @@ builder.Services.AddIdentity<ApplicationIdentityUser, IdentityRole>(options =>
     options.Password.RequireDigit = false;
     options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
     options.SignIn.RequireConfirmedAccount = true;
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
 })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AuthContext>()

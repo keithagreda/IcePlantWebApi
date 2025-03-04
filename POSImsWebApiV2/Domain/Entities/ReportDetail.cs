@@ -6,8 +6,8 @@ namespace Domain.Entities
     {
         public Guid Id { get; set; }
         public int ProductId { get; set; }
-        public int TotalQtyGenerated { get; set; }
-        public int TotalQtySold { get; set; }
+        public decimal TotalQtyGenerated { get; set; }
+        public decimal TotalQtySold { get; set; }
         public decimal TotalSales { get; set; }
         public decimal AverageGeneration { get; set; }
         public decimal TotalEstimatedCost { get; set; }

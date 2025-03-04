@@ -45,14 +45,14 @@ namespace POSIMSWebApi.Controllers
                         Bad = machineGroup.Where(e => e.ProductFk.Name == "Reject").Select(e => e.Quantity).Sum()
                     }).ToListAsync();
 
-                var totalGood = machineGeneration.Sum(e => e.Good);
-                var totalBad = machineGeneration.Sum(e => e.Bad);
+                var totalGood = Math.Round(machineGeneration.Sum(e => e.Good),2, MidpointRounding.AwayFromZero);
+                var totalBad = Math.Round(machineGeneration.Sum(e => e.Bad),2, MidpointRounding.AwayFromZero);
 
 
                 var res = new GetMachineGenerationWTotal 
                 { 
                     TotalGood = machineGeneration.Sum(e => e.Good),
-                    TotalGoodPercentage = (totalGood / (totalGood + totalBad) ) * 100,
+                    TotalGoodPercentage = Math.Round((totalGood / (totalGood + totalBad)) * 100, 2, MidpointRounding.AwayFromZero) ,
                     GetMachineGenerationV1Dtos = machineGeneration,
                 };
 

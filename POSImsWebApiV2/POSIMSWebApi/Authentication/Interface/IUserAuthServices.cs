@@ -8,5 +8,6 @@ namespace POSIMSWebApi.Authentication.Interface
         Task<ApiResponse<UserLoginDto>> LoginAccount(LoginUserDto login);
         Task<string> RegisterUser(RegisterUserDto register);
         public int GetCurrentUserId();
+        Task<ApiResponse<string>> AuthenticateUser(LoginUserDto login);
     }
 }

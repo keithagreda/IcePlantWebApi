@@ -25,7 +25,7 @@ namespace POSIMSWebApi.Application.Dtos.Report
         public decimal TotalSales { get; set; }
         public decimal TotalExpenses { get; set; }
         public decimal TotalEstimatedCost { get; set; }
-        public ICollection<ViewProductGeneratedReportDto> ViewProductGeneratedReportDtos { get; set; }
+        public IList<ViewProductGeneratedReportDto> ViewProductGeneratedReportDtos { get; set; }
     }
 
     public class ViewProductGeneratedReportDto
