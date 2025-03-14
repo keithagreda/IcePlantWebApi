@@ -41,8 +41,8 @@ namespace POSIMSWebApi.Controllers
                     .Select(machineGroup => new GetMachineGenerationV1Dto
                     {
                         MachineName = machineGroup.Key, // Machine Name
-                        Good = machineGroup.Where(e => e.ProductFk.Name == "Ice Block").Select(e => e.Quantity).Sum(),
-                        Bad = machineGroup.Where(e => e.ProductFk.Name == "Reject").Select(e => e.Quantity).Sum()
+                        Good = machineGroup.Where(e => e.ProductFk.Name == "Good").Select(e => e.Quantity).Sum(),
+                        Bad = machineGroup.Where(e => e.ProductFk.Name == "Bad").Select(e => e.Quantity).Sum()
                     }).ToListAsync();
 
                 var totalGood = Math.Round(machineGeneration.Sum(e => e.Good),2, MidpointRounding.AwayFromZero);
