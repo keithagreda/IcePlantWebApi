@@ -277,7 +277,7 @@ namespace POSIMSWebApi.Controllers
 
                 return BadRequest(ex.Message);
             }
-
         }
+
     }
 }

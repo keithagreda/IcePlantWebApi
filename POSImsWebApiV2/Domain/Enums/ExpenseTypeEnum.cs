@@ -7,4 +7,12 @@
         Labor,
         Salary
     }
+
+    public enum VoidRequestStatus
+    {
+        Pending,
+        Inprogress,
+        Accepted,
+        Declined
+    }
 }

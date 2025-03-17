@@ -28,6 +28,7 @@ namespace Domain.Interfaces
         ICreditRepository Credit { get; }
         IProductCostRepository ProductCost { get; }
         IProductCostDetailsRepository ProductCostDetail { get; }
+        IVoidRequestRepository VoidRequest { get; }
 
         IReportRepository Report { get;  }
         IReportDetailRepository ReportDetail { get;  }
