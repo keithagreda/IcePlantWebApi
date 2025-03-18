@@ -7,5 +7,6 @@
         public string Description { get; set; }
         public bool IsRead { get; set; }
         public string SentTo { get; set; }
+        public string? RedirectTo { get; set; }
     }
 }

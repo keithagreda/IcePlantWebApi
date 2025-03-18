@@ -7,4 +7,9 @@ namespace POSIMSWebApi.Application.Dtos.ProductDtos
         public string? FilterText { get; set; }
     }
 
+    public class GenericSearchParamsWithDate : GenericSearchParams
+    {
+        public DateTime? Date { get; set; }
+    }
+
 }

@@ -33,5 +33,6 @@ namespace POSIMSWebApi.Application.Dtos.Notification
     {
         public string Title { get; set; }
         public string Desc { get; set; }
+        public string? RedirectTo { get; set; }
     }
 }

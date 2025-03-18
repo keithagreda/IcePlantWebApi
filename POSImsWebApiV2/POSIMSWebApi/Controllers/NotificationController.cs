@@ -48,7 +48,8 @@ namespace POSIMSWebApi.Controllers
                 {
                     Title = input.Title,
                     Description = input.Desc,
-                    SentTo = admin
+                    SentTo = admin,
+                    RedirectTo = input.RedirectTo
                 };
                 notifications.Add(notification);
             }
@@ -111,7 +112,7 @@ namespace POSIMSWebApi.Controllers
 
                     })
                     .ToPaginatedResult((int)input.PageNumber, (int)input.PageSize)
-                    .OrderBy(e => e.CreationTime)
+                    .OrderByDescending(e => e.CreationTime)
                     .ToListAsync();
 
                 //humanize

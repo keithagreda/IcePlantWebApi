@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using POSIMSWebApi.Application.Dtos.Pagination;
+using POSIMSWebApi.Application.Dtos.ProductDtos;
 using POSIMSWebApi.Application.Dtos.Stocks;
 using POSIMSWebApi.Application.Dtos.StocksReceiving;
 using POSIMSWebApi.Application.Interfaces;
 using POSIMSWebApi.Authentication;
+using POSIMSWebApi.QueryExtensions;
 
 namespace POSIMSWebApi.Controllers
 {
@@ -39,11 +42,20 @@ namespace POSIMSWebApi.Controllers
         }
         [Authorize(Roles = UserRole.Admin + "," + UserRole.Inventory)]
         [HttpGet("GetReceivingStocks")]
-        public async Task<ActionResult<ApiResponse<List<GetAllStocksReceivingDto>>>> GetReceiveStocks()
+        public async Task<ActionResult<ApiResponse<PaginatedResult<GetAllStocksReceivingDto>>>> GetReceiveStocks([FromQuery]GenericSearchParamsWithDate input)
         {
-            var result = await _unitOfWork.StocksReceiving.GetQueryable()
+
+            var query = _unitOfWork.StocksReceiving.GetQueryable()
                 .Include(e => e.StocksHeaderFk).ThenInclude(e => e.ProductFK)
                 .Include(e => e.StocksHeaderFk.StorageLocationFk)
+                .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => false
+                || e.StocksHeaderFk.ProductFK.Name.Contains(input.FilterText)
+                || e.TransNum.Contains(input.FilterText))
+                .WhereIf(input.Date is not null, e => e.CreationTime.Date == input.Date.GetValueOrDefault().Date);
+
+            var count = await query.CountAsync();
+
+            var result = await query
                 .OrderByDescending(e => e.CreationTime)
                 .Select(e => new GetAllStocksReceivingDto
                 {
@@ -54,14 +66,18 @@ namespace POSIMSWebApi.Controllers
                     StorageLocation = e.StocksHeaderFk != null && e.StocksHeaderFk.StorageLocationFk != null
                     ? e.StocksHeaderFk.StorageLocationFk.Name
                     : "N/A",
-                            StorageLocationId = e.StocksHeaderFk != null && e.StocksHeaderFk.StorageLocationId.HasValue
+                    StorageLocationId = e.StocksHeaderFk != null && e.StocksHeaderFk.StorageLocationId.HasValue
                     ? e.StocksHeaderFk.StorageLocationId.Value
                     : 0,
                     DateReceived = e.CreationTime.ToString("f"),
                     Id = e.Id
-                }).ToListAsync();
+                })
+                .ToPaginatedResult(input.PageNumber, input.PageSize)
+                .ToListAsync();
 
-            return Ok(ApiResponse<List<GetAllStocksReceivingDto>>.Success(result));
+            return Ok(ApiResponse<PaginatedResult<GetAllStocksReceivingDto>>.Success(
+                new PaginatedResult<GetAllStocksReceivingDto>(result, count, (int)input.PageNumber, (int)input.PageSize)
+                ));
         }
         [Authorize(Roles = UserRole.Admin + "," + UserRole.Inventory + "," + UserRole.Owner)]
         [HttpGet("GetStocksGeneration")]

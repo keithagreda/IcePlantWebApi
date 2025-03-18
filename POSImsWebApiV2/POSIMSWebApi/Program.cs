@@ -67,6 +67,7 @@ builder.Services.AddScoped<IProductCostDetailService, ProductCostDetailService>(
 builder.Services.AddScoped<IRemarksService, RemarksService>();
 builder.Services.AddScoped<IStocksReconciliationService, StocksReconciliationService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IVoidRequestService, VoidRequestService>();
 
 builder.Services.AddScoped<SoftDeleteInterceptor>();
 builder.Services.AddScoped<AuditInterceptor>();

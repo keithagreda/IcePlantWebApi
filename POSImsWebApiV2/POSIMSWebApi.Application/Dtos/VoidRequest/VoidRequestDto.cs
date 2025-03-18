@@ -18,11 +18,15 @@ namespace POSIMSWebApi.Application.Dtos.VoidRequest
         public string? ApproverId { get; set; }
     }
 
-    public class GetVoidRequest
+    public class GetVoidRequest : VoidRequestDto
     {
         public string TransNum { get; set; }
         public string ApproverName { get; set; }
-        public VoidRequestDto VoidRequestDto { get; set; }
+        public string RequesterName { get; set; }
+        public string DateRequested { get; set; }
+        public string StrStatus { get; set; }
+        public Guid CreatedBy { get; set; }
+        public DateTime CreationTime { get; set; }
     }
 
     public class GetVoidRequestInput : GenericSearchParams

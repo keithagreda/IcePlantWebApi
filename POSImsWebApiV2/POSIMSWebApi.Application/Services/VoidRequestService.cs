@@ -39,6 +39,7 @@ namespace POSIMSWebApi.Application.Services
             };
 
             await _unitOfWork.VoidRequest.AddAsync(voidRequest);
+            await _unitOfWork.CompleteAsync();
             return ApiResponse<string>.Success("Success! Void Request has been sent!");
             //var salesTransNum = salesToBeVoided.TransNum;
 
