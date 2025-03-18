@@ -1,5 +1,6 @@
 ﻿using Domain.ApiResponse;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using POSIMSWebApi.Application.Dtos.Report;
@@ -18,8 +19,8 @@ namespace POSIMSWebApi.Controllers
             _reportService = reportService;
             _unitOfWork = unitOfWork;
         }
-
         [HttpGet("GenerateReport")]
+        [Authorize]
         public async Task<ActionResult<ApiResponse<ViewGeneratedReportDto>>> GenerateReport(DateTime date)
         {
             return Ok(await _reportService.GenerateReport(date));

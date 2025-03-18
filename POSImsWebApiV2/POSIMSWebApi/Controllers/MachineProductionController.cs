@@ -1,5 +1,6 @@
 ﻿using Domain.ApiResponse;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +17,11 @@ namespace POSIMSWebApi.Controllers
     public class MachineProductionController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<ApplicationIdentityUser> _userManager;
-        public MachineProductionController(IUnitOfWork unitOfWork, UserManager<ApplicationIdentityUser> userManager)
+        public MachineProductionController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _userManager = userManager;
         }
-
+        [Authorize]
         [HttpGet("GetAllMachineGeneration")]
         public async Task<ActionResult<ApiResponse<GetMachineGenerationWTotal>>> GetAllMachineGeneration([FromQuery] GetMachineGenerationInput input)
         {

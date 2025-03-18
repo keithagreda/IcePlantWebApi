@@ -1,4 +1,5 @@
 ﻿using Domain.ApiResponse;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using POSIMSWebApi.Application.Dtos.StocksReconciliation;
@@ -15,6 +16,7 @@ namespace POSIMSWebApi.Controllers
         {
             _stocksReconciliationService = stocksReconciliationService;
         }
+        [Authorize]
         [HttpPost("CreateOrEditStocksReconciliation")]
         public async Task<ActionResult<ApiResponse<string>>> CreateOrEditStocksReconciliation(CreateOrEditStocksReconciliationDto input)
         {

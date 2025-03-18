@@ -15,7 +15,7 @@ namespace POSIMSWebApi.Application.Dtos.VoidRequest
         public Guid Id { get; set; }
         public VoidRequestStatus Status { get; set; }
         public Guid? SalesHeaderId { get; set; }
-        public Guid? ApproverId { get; set; }
+        public string? ApproverId { get; set; }
     }
 
     public class GetVoidRequest

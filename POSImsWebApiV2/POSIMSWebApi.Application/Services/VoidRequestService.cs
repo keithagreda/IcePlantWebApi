@@ -20,11 +20,16 @@ namespace POSIMSWebApi.Application.Services
 
         public async Task<ApiResponse<string>> CreateVoidRequest(Guid salesHeaderId)
         {
+            
             var salesToBeVoided = await _unitOfWork.SalesHeader.FirstOrDefaultAsync(e => e.Id == salesHeaderId);
             if (salesToBeVoided is null)
             {
                 return ApiResponse<string>.Fail("Error! Sales Not Found!");
             }
+
+            var isExisting = await _unitOfWork.VoidRequest.GetQueryable().AnyAsync(e => e.Id == salesHeaderId);
+
+            if (isExisting) return ApiResponse<string>.Fail("Invalid Action! Void Request Already Exists!");
 
             VoidRequest voidRequest = new VoidRequest
             {
@@ -41,7 +46,7 @@ namespace POSIMSWebApi.Application.Services
             //await _unitOfWork.SalesDetail.RemoveRangeAsync(await _unitOfWork.SalesDetail.GetQueryable().Where(e => e.SalesHeaderId == salesHeaderId).ToListAsync());
         }
 
-        public async Task<ApiResponse<string>> UpdateVoidRequest(Guid voidReqId, VoidRequestStatus status, Guid? approverId)
+        public async Task<ApiResponse<string>> UpdateVoidRequest(Guid voidReqId, VoidRequestStatus status, string? approverId)
         {
             var voidReq = await _unitOfWork.VoidRequest.FirstOrDefaultAsync(e => e.Id == voidReqId);
             if (voidReq is null)
@@ -58,7 +63,7 @@ namespace POSIMSWebApi.Application.Services
 
             if(status != VoidRequestStatus.Inprogress)
             {
-                voidReq.ApproverId = approverId;
+                voidReq.ApproverId =  approverId;
             }
 
             if (status == VoidRequestStatus.Accepted)

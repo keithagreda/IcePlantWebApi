@@ -29,10 +29,12 @@ namespace Domain.Interfaces
         IProductCostRepository ProductCost { get; }
         IProductCostDetailsRepository ProductCostDetail { get; }
         IVoidRequestRepository VoidRequest { get; }
+        INotificationRepository Notification { get; }
 
         IReportRepository Report { get;  }
         IReportDetailRepository ReportDetail { get;  }
         IExpenseRepository Expense { get;  }
+        IApplicationIdentityUser ApplicationIdentityUser { get; }
 
         int Complete();
         Task<int> CompleteAsync();

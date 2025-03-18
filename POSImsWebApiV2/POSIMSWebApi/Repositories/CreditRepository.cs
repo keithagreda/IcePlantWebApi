@@ -11,25 +11,12 @@ namespace DataAccess.EFCore.Repositories
         }
     }
 
-    public class ReportRepository : GenericRepository<Report>, IReportRepository
+    public class NotificationRepository : GenericRepository<Notification>, INotificationRepository
     {
-        public ReportRepository(ApplicationContext context) : base(context)
+        public NotificationRepository(ApplicationContext context) : base(context)
         {
         }
     }
 
-    public class ReportDetailRepository : GenericRepository<ReportDetail>, IReportDetailRepository
-    {
-        public ReportDetailRepository(ApplicationContext context) : base(context)
-        {
-        }
-    }
-
-    public class ExpenseRepository : GenericRepository<Expense>, IExpenseRepository
-    {
-        public ExpenseRepository(ApplicationContext context) : base(context)
-        {
-        }
-    }
 
 }

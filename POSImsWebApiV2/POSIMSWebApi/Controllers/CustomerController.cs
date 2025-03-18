@@ -1,5 +1,6 @@
 ﻿using Domain.ApiResponse;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using POSIMSWebApi.Application.Dtos.Customer;
@@ -20,7 +21,7 @@ namespace POSIMSWebApi.Controllers
             _customerService = customerService;
             _unitOfWork = unitOfWork;
         }
-
+        [Authorize]
         public async Task<ActionResult<ApiResponse<PaginatedResult<CustomerDropDownDto>>>> CustomerDropDown([FromQuery]GenericSearchParams input)
         {
             var result = await _customerService.CustomerDropDown(input);

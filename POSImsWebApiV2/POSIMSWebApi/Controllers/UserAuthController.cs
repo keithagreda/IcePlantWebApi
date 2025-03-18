@@ -27,7 +27,7 @@ namespace POSIMSWebApi.Controllers
             return Ok(result);
         }
 
-        //[Authorize(Roles = UserRole.Admin)]
+        //[Authorize]
         [HttpPost("RegisterUser")]
         public async Task<ActionResult<ApiResponse<string>>> RegisterUser([FromQuery]RegisterUserDto input)
         {
@@ -35,7 +35,7 @@ namespace POSIMSWebApi.Controllers
             var result = await _userAuthServices.RegisterUser(input);
             return Ok(result);
         }
-
+        [Authorize]
         [HttpPost("AuthenticateUser")]
         public async Task<ActionResult<ApiResponse<string>>> AuthenticateUser([FromBody]LoginUserDto login)
         {

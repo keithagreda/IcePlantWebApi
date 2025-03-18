@@ -42,6 +42,7 @@ namespace POSIMSWebApi.UnitOfWorks
             ReportDetail = new ReportDetailRepository(_context);
             Expense = new ExpenseRepository(_context);
             VoidRequest = new VoidRequestRepository(_context);
+            Notification = new NotificationRepository(_context);
         }
         public ISalesHeaderRepository SalesHeader { get; private set; }
         public ISalesDetailRepository SalesDetail { get; private set; }
@@ -67,6 +68,8 @@ namespace POSIMSWebApi.UnitOfWorks
         public IReportDetailRepository ReportDetail { get; private set; }
         public IExpenseRepository Expense { get; private set; }
         public  IVoidRequestRepository VoidRequest { get; private set; }
+        public INotificationRepository Notification { get; private set; }
+        public IApplicationIdentityUser ApplicationIdentityUser { get; private set; }
 
         public int Complete()
         {

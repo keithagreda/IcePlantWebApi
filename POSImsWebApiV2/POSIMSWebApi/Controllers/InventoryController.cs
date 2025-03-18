@@ -54,7 +54,7 @@ namespace POSIMSWebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+        [Authorize]
         [HttpGet("GetStockCard")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<GetStockCardDayDto>>>> GetStockCard([FromQuery] InventoryFilterV1 input)
         {

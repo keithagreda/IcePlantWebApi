@@ -152,6 +152,7 @@ namespace POSIMSWebApi
         public DbSet<ReportDetail> ReportDetails { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<VoidRequest> VoidRequests { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())

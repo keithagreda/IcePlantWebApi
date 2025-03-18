@@ -97,7 +97,7 @@ namespace POSIMSWebApi.Controllers
             }
             return Ok(ApiResponse<CreateOrEditMachineDto>.Success(dto));
         }
-
+        [Authorize]
         [HttpGet("GetMachineForDropdown")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<GetMachineForDropDown>>>> GetMachineForDropdown([FromQuery] GenericSearchParams? input)
         {

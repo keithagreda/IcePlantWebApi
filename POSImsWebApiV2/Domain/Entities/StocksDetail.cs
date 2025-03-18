@@ -22,7 +22,7 @@ namespace Domain.Entities
 
         [ForeignKey("SalesHeaderId")]
         public SalesHeader SalesHeaderFk { get; set; }
-        public Guid? ApproverId { get; set; }
+        public string? ApproverId { get; set; }
     }
 
 }

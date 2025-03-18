@@ -19,6 +19,7 @@ using POSIMSWebApi.Authentication.Services;
 using System.Security.Claims;
 using POSIMSWebApi.Authentication.AuthorizationHelper;
 using POSIMSWebApi.UnitOfWorks;
+using POSIMSWebApi.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,7 +74,16 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader().WithMethods("GET", "POST", "PUT", "DELETE"));
+    options.AddDefaultPolicy(builder =>
+        builder.AllowAnyOrigin()
+               .AllowAnyHeader()
+               .WithMethods("GET", "POST", "PUT", "DELETE")); // No credentials allowed here
+
+    options.AddPolicy("AllowSignalR", builder =>
+        builder.WithOrigins("http://localhost:4200") // Specify frontend origin
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials()); // Required for SignalR
 });
 
 builder.Services.AddIdentity<ApplicationIdentityUser, IdentityRole>(options =>
@@ -131,10 +141,13 @@ builder.Services.AddAuthentication(option =>
 //});
 builder.Services.AddHealthChecks();
 builder.Services.AddMemoryCache();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
 app.MapHealthChecks("/healthz");
+app.MapHub<NotificationHub>("/notificationHub").RequireCors("AllowSignalR");
+//app.MapHub<NotificationHub>("/notificationHub");
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
