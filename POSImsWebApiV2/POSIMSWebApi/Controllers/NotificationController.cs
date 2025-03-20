@@ -99,6 +99,7 @@ namespace POSIMSWebApi.Controllers
                 }
 
                 var notifications = await context
+                    .OrderByDescending(e => e.CreationTime)
                     //.WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => false || e.Title == input.FilterText || e.Description == input.FilterText)
                     .Select(e => new GetNotificationDto
                     {
@@ -112,7 +113,6 @@ namespace POSIMSWebApi.Controllers
 
                     })
                     .ToPaginatedResult((int)input.PageNumber, (int)input.PageSize)
-                    .OrderByDescending(e => e.CreationTime)
                     .ToListAsync();
 
                 //humanize

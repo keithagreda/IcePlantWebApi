@@ -37,6 +37,13 @@ namespace POSIMSWebApi.Interceptors
                             auditableEntity.ModifiedBy = userId;
                             auditableEntity.ModifiedTime = DateTime.UtcNow;
                         }
+                        if (entry.State == EntityState.Deleted )
+                        {
+                            entry.State = EntityState.Modified;
+                            auditableEntity.DeletedBy = userId;
+                            auditableEntity.IsDeleted = true;
+                            auditableEntity.DeletionTime = DateTime.UtcNow;
+                        }
                     }
                 }
                 else
@@ -71,6 +78,14 @@ namespace POSIMSWebApi.Interceptors
                         {
                             auditableEntity.ModifiedBy = userId;
                             auditableEntity.ModifiedTime = DateTime.UtcNow;
+                        }
+
+                        if (entry.State == EntityState.Deleted)
+                        {
+                            entry.State = EntityState.Modified;
+                            auditableEntity.DeletedBy = userId;
+                            auditableEntity.IsDeleted = true;
+                            auditableEntity.DeletionTime = DateTime.UtcNow;
                         }
                     }
                 }

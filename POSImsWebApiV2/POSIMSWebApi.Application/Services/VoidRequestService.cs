@@ -13,9 +13,13 @@ namespace POSIMSWebApi.Application.Services
     public class VoidRequestService : IVoidRequestService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public VoidRequestService(IUnitOfWork unitOfWork)
+        private readonly IInventoryService _inventoryService;
+        private readonly ICacheService _cacheService;
+        public VoidRequestService(IUnitOfWork unitOfWork, IInventoryService inventoryService, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
+            _inventoryService = inventoryService;
+            _cacheService = cacheService;
         }
 
         public async Task<ApiResponse<string>> CreateVoidRequest(Guid salesHeaderId)
@@ -27,9 +31,12 @@ namespace POSIMSWebApi.Application.Services
                 return ApiResponse<string>.Fail("Error! Sales Not Found!");
             }
 
-            var isExisting = await _unitOfWork.VoidRequest.GetQueryable().AnyAsync(e => e.Id == salesHeaderId);
+            var isExisting = await _unitOfWork.VoidRequest.GetQueryable().AnyAsync(e => e.SalesHeaderId == salesHeaderId);
 
-            if (isExisting) return ApiResponse<string>.Fail("Invalid Action! Void Request Already Exists!");
+            if (isExisting)
+            {
+                return ApiResponse<string>.Fail("Invalid Action! Void Request Already Exists!");
+            }
 
             VoidRequest voidRequest = new VoidRequest
             {
@@ -69,8 +76,18 @@ namespace POSIMSWebApi.Application.Services
 
             if (status == VoidRequestStatus.Accepted)
             {
-                var salesHeader = await _unitOfWork.SalesHeader.FirstOrDefaultAsync(e => e.Id == voidReq.SalesHeaderId);
+                var salesHeader = await _unitOfWork.SalesHeader.GetQueryable().Include(e => e.InventoryBeginningFk)
+                    .Where(e => e.Id == voidReq.SalesHeaderId)
+                    .FirstOrDefaultAsync();
+
+                if(salesHeader.InventoryBeginningFk.Status == InventoryStatus.Closed)
+                {
+                    return ApiResponse<string>.Fail("Invalid Action! Inventory for this transaction has already been closed!");
+                }
+                var salesDetails = await _unitOfWork.SalesDetail.GetQueryable().Where(e => e.SalesHeaderId == salesHeader.Id).ToListAsync();
                 await _unitOfWork.SalesHeader.RemoveAsync(salesHeader);
+                await _unitOfWork.SalesDetail.RemoveRangeAsync(salesDetails);
+                _cacheService.RemoveInventoryCache();
             }
             await _unitOfWork.CompleteAsync();
             return ApiResponse<string>.Success("");

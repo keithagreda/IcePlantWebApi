@@ -15,7 +15,6 @@ namespace POSIMSWebApi
 {
     public class ApplicationContext : DbContext
     {
-        private readonly SoftDeleteInterceptor _softDeleteInterceptor;
         private readonly AuditInterceptor _auditInterceptor;
         private IHttpContextAccessor _httpContextAccessor;
 
@@ -23,9 +22,8 @@ namespace POSIMSWebApi
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
-        public ApplicationContext(DbContextOptions<ApplicationContext> options, SoftDeleteInterceptor softDeleteInterceptor, AuditInterceptor auditInterceptor, IHttpContextAccessor httpContextAccessor) : base(options)
+        public ApplicationContext(DbContextOptions<ApplicationContext> options, AuditInterceptor auditInterceptor, IHttpContextAccessor httpContextAccessor) : base(options)
         {
-            _softDeleteInterceptor = softDeleteInterceptor;
             _auditInterceptor = auditInterceptor;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -33,7 +31,7 @@ namespace POSIMSWebApi
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.AddInterceptors(_auditInterceptor);
-            optionsBuilder.AddInterceptors(_softDeleteInterceptor);
+            //optionsBuilder.AddInterceptors(_softDeleteInterceptor);
         }
         //public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         //{

@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using POSIMSWebApi;
+using Domain.Entities;
 
 namespace DataAccess.EFCore.Repositories
 {
@@ -187,23 +188,49 @@ namespace DataAccess.EFCore.Repositories
 
         public void Remove(T entity)
         {
-            _context.Set<T>().Remove(entity);
+            if (entity is AuditedEntity deletableEntity)
+            {
+                deletableEntity.IsDeleted = true;
+                deletableEntity.DeletionTime = DateTime.UtcNow;
+                _context.Set<T>().Update(entity); // Ensure EF tracks this as modified
+            }
         }
 
         public void RemoveRange(IEnumerable<T> entities)
         {
-            _context.Set<T>().RemoveRange(entities);
+            foreach (var entity in entities)
+            {
+                if (entity is AuditedEntity deletableEntity)
+                {
+                    deletableEntity.IsDeleted = true;
+                    deletableEntity.DeletionTime = DateTime.UtcNow;
+                }
+            }
+            _context.Set<T>().UpdateRange(entities); // Mark all as modified
         }
 
         public async Task RemoveAsync(T entity)
         {
-            _context.Set<T>().Remove(entity);
+            if (entity is AuditedEntity deletableEntity)
+            {
+                deletableEntity.IsDeleted = true;
+                deletableEntity.DeletionTime = DateTime.UtcNow;
+                _context.Set<T>().Update(entity);
+            }
             await _context.SaveChangesAsync();
         }
 
         public async Task RemoveRangeAsync(IEnumerable<T> entities)
         {
-            _context.Set<T>().RemoveRange(entities);
+            foreach (var entity in entities)
+            {
+                if (entity is AuditedEntity deletableEntity)
+                {
+                    deletableEntity.IsDeleted = true;
+                    deletableEntity.DeletionTime = DateTime.UtcNow;
+                }
+            }
+            _context.Set<T>().UpdateRange(entities);
             await _context.SaveChangesAsync();
         }
     }

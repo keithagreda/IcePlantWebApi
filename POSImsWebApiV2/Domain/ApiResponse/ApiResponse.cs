@@ -37,7 +37,7 @@ namespace Domain.ApiResponse
             {
                 IsSuccess = false,
                 Message = message,
-                Errors = errors ?? new List<string>()
+                Errors = errors ?? []
             };
         }
     }

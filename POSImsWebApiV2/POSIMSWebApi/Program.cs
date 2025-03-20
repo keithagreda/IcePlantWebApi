@@ -20,6 +20,7 @@ using System.Security.Claims;
 using POSIMSWebApi.Authentication.AuthorizationHelper;
 using POSIMSWebApi.UnitOfWorks;
 using POSIMSWebApi.SignalR;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -124,6 +125,22 @@ builder.Services.AddAuthentication(option =>
         ValidAudience = builder.Configuration["JWT:ValidAudience"],
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]!))
+    };
+
+    o.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"]; // ?? Extract token from query string
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+            {
+                context.Token = accessToken; // ? Set token manually
+            }
+
+            return Task.CompletedTask;
+        }
     };
 });
 

@@ -33,6 +33,7 @@ namespace POSIMSWebApi.Application.Dtos.Sales
         public string SoldBy { get; set; }
         public string CustomerName { get; set; }
         public List<SalesDetailDto> SalesDetailsDto { get; set; } = new List<SalesDetailDto>();
+        public bool? IsInventoryClosed { get; set; }
     }
 
     public class SalesDetailDto

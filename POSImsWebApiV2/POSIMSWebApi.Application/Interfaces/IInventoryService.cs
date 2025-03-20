@@ -15,5 +15,8 @@ namespace POSIMSWebApi.Application.Interfaces
         Task<ApiResponse<string>> CloseInventory();
         Task<ApiResponse<PaginatedResult<GetStockCardDayDto>>> GetStockCard(InventoryFilterV1 input);
         string CancelCache();
+        void RefreshCache();
+
+
     }
 }

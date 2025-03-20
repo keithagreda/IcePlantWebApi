@@ -510,6 +510,11 @@ namespace POSIMSWebApi.Application.Services
             }
         }
 
+        public void RefreshCache()
+        {
+            _memoryCache.Remove(_cacheKey);
+        }
+
         public async Task<Guid> CreateOrGetInventoryBeginning()
         {
             var checkIfInventoryIsOpen = await _unitOfWork.InventoryBeginning.FirstOrDefaultAsync(e => e.Status == InventoryStatus.Open);

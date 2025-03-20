@@ -33,12 +33,13 @@ namespace POSIMSWebApi.Controllers
         public async Task<ActionResult<ApiResponse<PaginatedResult<SalesHeaderDto>>>> GetSales([FromQuery]FilterSales input)
         {
             //dapat naay created by
-            var query = _unitOfWork.SalesHeader.GetQueryable().Include(e => e.SalesDetails)
+            var query = _unitOfWork.SalesHeader.GetQueryable()
+                .Include(e => e.InventoryBeginningFk)
+                .Include(e => e.SalesDetails)
                 .ThenInclude(e => e.ProductFk)
                 .Include(e => e.CustomerFk);
             var data = await query
                 .OrderByDescending(e => e.CreationTime)
-                .ToPaginatedResult(input.PageNumber, input.PageSize)
                 .Select(e => new SalesHeaderDto
                 {
                     Id = e.Id,
@@ -47,6 +48,7 @@ namespace POSIMSWebApi.Controllers
                     TransNum = e.TransNum,
                     SoldBy = e.CreatedBy.ToString(),
                     CustomerName = e.CustomerFk != null ? e.CustomerFk.Name : "N/A",
+                    IsInventoryClosed = e.InventoryBeginningFk.Status == Domain.Enums.InventoryStatus.Closed ? true : false,
                     SalesDetailsDto = e.SalesDetails.Select(e => new SalesDetailDto
                     {
                         ActualSellingPrice = e.ActualSellingPrice,
@@ -56,7 +58,9 @@ namespace POSIMSWebApi.Controllers
                         Quantity = e.Quantity,
                         ProductPrice = e.ProductPrice
                     }).ToList()
-                }).ToListAsync();
+                })
+                .ToPaginatedResult(input.PageNumber, input.PageSize)
+                .ToListAsync();
 
             foreach(var item in data)
             {

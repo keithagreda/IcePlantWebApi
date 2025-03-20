@@ -37,41 +37,49 @@ namespace POSIMSWebApi.Controllers
         }
         [Authorize]
         [HttpGet("GetVoidRequest")]
-        public async Task<ActionResult<ApiResponse<PaginatedResult<GetVoidRequest>>>> GetVoidRequest([FromQuery]GetVoidRequestInput input)
+        public async Task<ActionResult<ApiResponse<PaginatedResult<GetVoidRequest>>>> GetVoidRequest([FromQuery] GetVoidRequestInput input)
         {
             try
             {
                 var voidReq = _unitOfWork.VoidRequest.GetQueryable()
-               .Include(e => e.SalesHeaderFk)
-               .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => false || e.SalesHeaderFk.TransNum == input.FilterText);
+                    .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => false || e.SalesHeaderFk.TransNum == input.FilterText);
 
+                var sales = _unitOfWork.SalesHeader.GetQueryable().IgnoreQueryFilters();
 
-                var count = await voidReq.CountAsync();
+                var join = from v in voidReq
+                           join s in sales on v.SalesHeaderId equals s.Id into vs
+                           from s in vs.DefaultIfEmpty()
+                           orderby v.CreationTime descending
+                           select new GetVoidRequest
+                           {
+                               ApproverName = "",
+                               TransNum = s.TransNum,
+                               Status = v.Status,
+                               ApproverId = v.ApproverId,
+                               //RequesterName = "",
+                               Id = v.Id,
+                               SalesHeaderId = v.SalesHeaderId,
+                               CreatedBy = v.CreatedBy,
+                               CreationTime = v.CreationTime
+                           };
+
+                var count = await join.CountAsync();
                 var users = await _userManager.Users.Select(e => new
                 {
                     e.Id,
                     e.UserName
                 }).ToListAsync();
 
-                var paginated = await voidReq.Select(e => new GetVoidRequest
-                {
-                    ApproverName = "",
-                    TransNum = e.SalesHeaderFk.TransNum,
-                    Status = e.Status,
-                    ApproverId = e.ApproverId,
-                    //RequesterName = "",
-                    Id = e.Id,
-                    SalesHeaderId = e.SalesHeaderId,
-                    CreatedBy = e.CreatedBy,
-                    StrStatus = e.Status.Humanize(),
-                    CreationTime = e.CreationTime
-                }).ToPaginatedResult(input.PageNumber, input.PageSize).ToListAsync();
+                var paginated = await join
+                    .ToPaginatedResult(input.PageNumber, input.PageSize)
+                    .ToListAsync();
 
-                foreach(var item in paginated)
+                foreach (var item in paginated)
                 {
                     item.ApproverName = users.FirstOrDefault(u => u.Id == item.ApproverId)?.UserName ?? "-";
                     item.RequesterName = users.FirstOrDefault(u => u.Id == item.CreatedBy.ToString())?.UserName ?? "";
-                    item.DateRequested = item.CreationTime.Humanize();
+                    item.DateRequested = item.CreationTime.ToString("g");
+                    item.StrStatus = item.Status.Humanize();
                 }
 
                 var result = new PaginatedResult<GetVoidRequest>(paginated, count, (int)input.PageNumber, (int)input.PageSize);
@@ -86,21 +94,20 @@ namespace POSIMSWebApi.Controllers
             }
         }
         [Authorize]
-
         [HttpPost("CreateVoidRequest")]
         public async Task<ActionResult<ApiResponse<string>>> CreateVoidRequest(Guid salesHeaderId)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
-            var result = await _voidRequestService.CreateVoidRequest(salesHeaderId);
-            if (result.IsSuccess)
-            {
+                var result = await _voidRequestService.CreateVoidRequest(salesHeaderId);
                 return Ok(result);
             }
+            catch (Exception ex)
+            {
 
-            return BadRequest(result);
+                throw ex;
+            }
+
         }
         [Authorize]
         [HttpPost("UpdateVoidRequest")]
@@ -113,12 +120,8 @@ namespace POSIMSWebApi.Controllers
                 return BadRequest(ModelState);
             }
             var result = await _voidRequestService.UpdateVoidRequest(voidReqId, status, userId);
-            if (result.IsSuccess)
-            {
-                return Ok(result);
-            }
+            return Ok(result);
 
-            return BadRequest(result);
         }
     }
 }
