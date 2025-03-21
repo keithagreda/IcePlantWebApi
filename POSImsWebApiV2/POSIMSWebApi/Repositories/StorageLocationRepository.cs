@@ -15,5 +15,5 @@ namespace DataAccess.EFCore.Repositories
         public StorageLocationRepository(ApplicationContext context) : base(context)
         {
         }
-    }
+    } 
 }

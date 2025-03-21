@@ -30,8 +30,8 @@ namespace Domain.Interfaces
         IProductCostDetailsRepository ProductCostDetail { get; }
         IVoidRequestRepository VoidRequest { get; }
         INotificationRepository Notification { get; }
-
         IReportRepository Report { get;  }
+        IInventoryReconciliationRepository InventoryReconciliation { get;  }
         IReportDetailRepository ReportDetail { get;  }
         IExpenseRepository Expense { get;  }
         IApplicationIdentityUser ApplicationIdentityUser { get; }

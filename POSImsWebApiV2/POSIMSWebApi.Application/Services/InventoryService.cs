@@ -209,7 +209,11 @@ namespace POSIMSWebApi.Application.Services
                                                                 .Where(e => e.InventoryBeginningId == g.Key.InventoryBeginningId && e.StocksHeaderFk.ProductId == g.Key.ProductId)
                                                                 .Count() != 0 ? _unitOfWork.StocksReceiving.GetQueryable().Include(e => e.StocksHeaderFk)
                                                                 .Where(e => e.InventoryBeginningId == g.Key.InventoryBeginningId && e.StocksHeaderFk.ProductId == g.Key.ProductId)
-                                                                .Sum(e => e.Quantity) : 0m
+                                                                .Sum(e => e.Quantity) : 0m,
+                                                  ReconcilliationQty = _unitOfWork.InventoryReconciliation.GetQueryable().Where(e => e.InventoryBeginningId 
+                                                                == g.Key.InventoryBeginningId && e.ProductId == g.Key.ProductId).Count() != 0 ? 
+                                                                _unitOfWork.InventoryReconciliation.GetQueryable().Where(e => e.InventoryBeginningId == g.Key.InventoryBeginningId 
+                                                                && e.ProductId == g.Key.ProductId).Sum(e => e.Quantity) : 0m
                                               };
 
                 // Apply Filtering & Pagination
@@ -393,7 +397,7 @@ namespace POSIMSWebApi.Application.Services
         //                    .SetSize(1);
 
         //                _memoryCache.Set(_allInventory, result, cacheOptions);
-        //            }
+        //            }z`
         //        }
         //        finally
         //        {
@@ -463,18 +467,34 @@ namespace POSIMSWebApi.Application.Services
                                 TotalQuantity = g.Sum(e => e.Quantity)
                             });
 
+                        var invRecon = _unitOfWork.InventoryReconciliation.GetQueryable()
+                            .Include(e => e.ProductFk)
+                            .Include(e => e.InventoryBeginningFk)
+                            .Where(e => e.InventoryBeginningFk.Status == InventoryStatus.Open)
+                            .GroupBy(e => e.ProductId)
+                            .Select(g => new
+                            {
+                                ProductId = g.Key,
+                                TotalQuantity = g.Sum(e => e.Quantity)
+                            });
+
                         join = (from currInv in getCurrentInventory
                                 join recv in receivedStocks on currInv.ProductId equals recv.ProductId into recvGroup
                                 from recv in recvGroup.DefaultIfEmpty()
                                 join sales in salesDetails on currInv.ProductId equals sales.ProductId into salesGroup
                                 from sales in salesGroup.DefaultIfEmpty()
+                                join ir in invRecon on currInv.ProductId equals ir.ProductId into invReconGroup
+                                from ir in invReconGroup.DefaultIfEmpty()
                                 select new CurrentInventoryDto
                                 {
                                     ProductName = currInv.ProductName,
+                                    ProductId = currInv.ProductId,
                                     ReceivedQty = recv != null ? recv.TotalQuantity : 0,
                                     SalesQty = sales != null ? sales.TotalQuantity : 0,
                                     BegQty = currInv.TotalQuantity,
-                                    CurrentStocks = (currInv != null ? currInv.TotalQuantity : 0) + (recv != null ? recv.TotalQuantity : 0) - (sales != null ? sales.TotalQuantity : 0)
+                                    ReconciliationQty = ir != null  ? ir.TotalQuantity : 0,
+                                    CurrentStocks = (currInv != null ? currInv.TotalQuantity : 0) + (recv != null ? recv.TotalQuantity : 0) 
+                                    - (sales != null ? sales.TotalQuantity : 0) + (ir != null ? ir.TotalQuantity : 0)
                                 }).ToList();
 
                         var cacheOptions = new MemoryCacheEntryOptions()
@@ -561,6 +581,17 @@ namespace POSIMSWebApi.Application.Services
                     })
                     .ToListAsync();
 
+                var reconcilliation = await _unitOfWork.InventoryReconciliation
+                    .GetQueryable()
+                    .Include(e => e.ProductFk)
+                    .Where(e => e.InventoryBeginningId == currentOpenedInvId)
+                    .GroupBy(e => e.ProductId)
+                    .Select(g => new
+                    {
+                        ProductId = g.Key,
+                        TotalQuantity = g.Sum(e => e.Quantity)
+                    }).ToListAsync();
+
                 //var sales = await _context.SalesHeaders.Include(e => e.SalesDetails).Include(e => e.InventoryBeginningFk)
                 //    .Where(e => e.InventoryBeginningFk.Status == InventoryStatus.Open).GroupBy(e => e.SalesDetails)
 
@@ -601,10 +632,12 @@ namespace POSIMSWebApi.Application.Services
                             join s in salesDetails
                             on i.ProductId equals s.ProductId into jirs
                             from irs in jirs.DefaultIfEmpty() // Left join with salesDetails
+                            join recon in reconcilliation on i.ProductId equals recon.ProductId into irecon
+                            from recon in irecon.DefaultIfEmpty()
                             select new InventoryBeginningDetails
                             {
                                 ProductId = i.ProductId, // Use i.ProductId directly as it always exists
-                                Qty = (i.Quantity + (ir?.TotalQuantity ?? 0)) - (irs?.TotalQuantity ?? 0),
+                                Qty = (i.Quantity + (ir?.TotalQuantity ?? 0)) - (irs?.TotalQuantity ?? 0) + (recon?.TotalQuantity ?? 0),
                                 InventoryBeginningId = newInventory.Id,
                                 CreationTime = DateTime.UtcNow,
                             }).ToList();

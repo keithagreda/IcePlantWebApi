@@ -13,7 +13,9 @@ namespace POSIMSWebApi.Application.Dtos.Inventory
         public decimal ReceivedQty { get; set; }
         public decimal SalesQty { get; set; }
         public decimal BegQty { get; set; }
+        public decimal ReconciliationQty { get; set; }
         public decimal CurrentStocks { get; set; }
+        public int ProductId { get; set; }
     }
 
     public class GetInventoryDto
@@ -23,6 +25,7 @@ namespace POSIMSWebApi.Application.Dtos.Inventory
         public string? ProductName { get; set; }
         public decimal BegQty { get; set; }
         public decimal ReceivedQty { get; set; }
+        public decimal ReconcilliationQty { get; set; }
         public decimal SalesQty { get; set; }
         public DateTimeOffset? InventoryBegTime { get; set; }
         public DateTimeOffset? InventoryEndTime { get; set;}
