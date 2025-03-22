@@ -130,8 +130,8 @@ namespace POSIMSWebApi.Controllers
                 return BadRequest(ex);
             }
         }
-
-        private async Task<ActionResult<ApiResponse<string>>> SendMessageToAdmin(string message)
+        [HttpPost("SendMessageToAdmin")]
+        public async Task<ActionResult<ApiResponse<string>>> SendMessageToAdmin(string message)
         {
             await _hubContext.Clients.All.SendAsync("AdminNotification", message);
             return Ok(ApiResponse<string>.Success(""));

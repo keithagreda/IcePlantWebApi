@@ -642,7 +642,10 @@ namespace POSIMSWebApi.Application.Services
                                 CreationTime = DateTime.UtcNow,
                             }).ToList();
 
-
+                if(join.Any(e => e.Qty < 0))
+                {
+                    return ApiResponse<string>.Fail("Action denied: Please reconcile negative products before closing inventory.");
+                }
 
                 //insert to inventory beginning details
                 await _unitOfWork.InventoryBeginning.AddAsync(newInventory);
