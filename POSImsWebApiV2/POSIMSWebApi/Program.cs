@@ -70,6 +70,7 @@ builder.Services.AddScoped<IStocksReconciliationService, StocksReconciliationSer
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IVoidRequestService, VoidRequestService>();
 builder.Services.AddScoped<IInventoryReconcillationService, InventoryReconcillationService>();
+builder.Services.AddScoped<IPrinterLogsService, PrinterLogsService>();
 
 builder.Services.AddScoped<SoftDeleteInterceptor>();
 builder.Services.AddScoped<AuditInterceptor>();

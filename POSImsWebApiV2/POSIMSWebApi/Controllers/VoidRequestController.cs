@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POSIMSWebApi.Application.Dtos.Pagination;
 using POSIMSWebApi.Application.Dtos.VoidRequest;
-using POSIMSWebApi.Application.Services;
+using POSIMSWebApi.Application.Interfaces;
 using POSIMSWebApi.Authentication;
 using POSIMSWebApi.QueryExtensions;
 using System.Security.Claims;

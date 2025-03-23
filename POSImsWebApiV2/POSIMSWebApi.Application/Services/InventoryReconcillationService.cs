@@ -3,6 +3,7 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using POSIMSWebApi.Application.Dtos.InventoryReconcillation;
+using POSIMSWebApi.Application.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

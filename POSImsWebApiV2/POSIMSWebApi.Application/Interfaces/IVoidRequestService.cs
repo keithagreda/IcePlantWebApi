@@ -1,7 +1,7 @@
 ﻿using Domain.ApiResponse;
 using Domain.Enums;
 
-namespace POSIMSWebApi.Application.Services
+namespace POSIMSWebApi.Application.Interfaces
 {
     public interface IVoidRequestService
     {

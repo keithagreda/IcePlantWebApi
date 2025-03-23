@@ -10,6 +10,5 @@ namespace DataAccess.EFCore.Repositories
         public ProductStocksRepository(ApplicationContext context) : base(context)
         {
         }
-
     }
 }

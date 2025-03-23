@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POSIMSWebApi.Application.Dtos.InventoryReconcillation;
 using POSIMSWebApi.Application.Dtos.Pagination;
-using POSIMSWebApi.Application.Services;
+using POSIMSWebApi.Application.Interfaces;
 using POSIMSWebApi.QueryExtensions;
 
 namespace POSIMSWebApi.Controllers

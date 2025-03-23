@@ -165,8 +165,8 @@ namespace POSIMSWebApi.Application.Services
         private string TransNumGenerator(int productId, int storageId)
         {
             var dateNow = DateTime.UtcNow.Date;
-            var prodCode =  _unitOfWork.Product.GetQueryable().Where(e => e.Id == productId).Select(e => e.ProdCode ).FirstOrDefault();
-            var stockReceiving = _unitOfWork.StocksReceiving.GetQueryable().Where(e => e.CreationTime.Date == dateNow);
+            var prodCode =  _unitOfWork.Product.GetQueryable().IgnoreQueryFilters().Where(e => e.Id == productId).Select(e => e.ProdCode ).FirstOrDefault();
+            var stockReceiving = _unitOfWork.StocksReceiving.GetQueryable().IgnoreQueryFilters().Where(e => e.CreationTime.Date == dateNow);
             var currentTransCount = stockReceiving.Count() + 1;
             string datePart = DateTime.UtcNow.ToString("yyMMdd");
             return $"{prodCode}-{datePart}-{currentTransCount}-{storageId}";

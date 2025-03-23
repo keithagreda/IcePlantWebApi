@@ -44,6 +44,7 @@ namespace POSIMSWebApi.UnitOfWorks
             VoidRequest = new VoidRequestRepository(_context);
             Notification = new NotificationRepository(_context);
             InventoryReconciliation = new InventoryReconciliationRepository(_context);
+            PrinterLogs = new PrinterLogsRepository(_context);
         }
         public ISalesHeaderRepository SalesHeader { get; private set; }
         public ISalesDetailRepository SalesDetail { get; private set; }
@@ -72,6 +73,7 @@ namespace POSIMSWebApi.UnitOfWorks
         public INotificationRepository Notification { get; private set; }
         public IApplicationIdentityUser ApplicationIdentityUser { get; private set; }
         public IInventoryReconciliationRepository InventoryReconciliation { get; private set; }
+        public IPrinterLogsRepository PrinterLogs { get; private set; }
 
         public int Complete()
         {

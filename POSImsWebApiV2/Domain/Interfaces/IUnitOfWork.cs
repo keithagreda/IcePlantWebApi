@@ -35,6 +35,7 @@ namespace Domain.Interfaces
         IReportDetailRepository ReportDetail { get;  }
         IExpenseRepository Expense { get;  }
         IApplicationIdentityUser ApplicationIdentityUser { get; }
+        IPrinterLogsRepository PrinterLogs { get;  }
 
         int Complete();
         Task<int> CompleteAsync();

@@ -1,7 +1,7 @@
 ﻿using Domain.ApiResponse;
 using POSIMSWebApi.Application.Dtos.InventoryReconcillation;
 
-namespace POSIMSWebApi.Application.Services
+namespace POSIMSWebApi.Application.Interfaces
 {
     public interface IInventoryReconcillationService
     {
