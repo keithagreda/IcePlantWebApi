@@ -39,7 +39,7 @@ namespace POSIMSWebApi.Controllers
             }
         }
 
-        //[Authorize(Roles = UserRole.Admin + "," + UserRole.Inventory)]
+        [Authorize(Roles = UserRole.Admin + "," + UserRole.Inventory + "," + UserRole.Owner)]
         [HttpGet("GetAllInventory")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<GetInventoryDto>>>> GetAllInventory([FromQuery]InventoryFilter input)
         {
@@ -61,7 +61,7 @@ namespace POSIMSWebApi.Controllers
             try
             {
 
-                var data = await _inventoryService.GetStockCard(input);
+                    var data = await _inventoryService.GetStockCard(input);
                 return Ok(data);
             }
             catch (Exception ex)

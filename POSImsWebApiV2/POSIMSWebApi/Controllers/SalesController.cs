@@ -28,7 +28,7 @@ namespace POSIMSWebApi.Controllers
             _unitOfWork = unitOfWork;
             _userManager = userManager;
         }
-        [Authorize(Roles = UserRole.Admin + "," + UserRole.Cashier)]
+        [Authorize(Roles = UserRole.Admin + "," + UserRole.Cashier + "," + UserRole.Owner)]
         [HttpGet("GetSales")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<SalesHeaderDto>>>> GetSales([FromQuery]FilterSales input)
         {
@@ -44,7 +44,7 @@ namespace POSIMSWebApi.Controllers
                 {
                     Id = e.Id,
                     TotalAmount = e.TotalAmount,
-                    TransactionDate = e.CreationTime.AddHours(8).ToString("g"),
+                    TransactionDate = e.CreationTime,
                     TransNum = e.TransNum,
                     SoldBy = e.CreatedBy.ToString(),
                     CustomerName = e.CustomerFk != null ? e.CustomerFk.Name : "N/A",

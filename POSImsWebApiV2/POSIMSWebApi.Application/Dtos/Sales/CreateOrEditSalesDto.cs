@@ -29,7 +29,7 @@ namespace POSIMSWebApi.Application.Dtos.Sales
         public Guid Id { get; set; }
         public decimal TotalAmount { get; set; }
         public string? TransNum { get; set; }
-        public string TransactionDate { get; set; }
+        public DateTime TransactionDate { get; set; }
         public string SoldBy { get; set; }
         public string CustomerName { get; set; }
         public List<SalesDetailDto> SalesDetailsDto { get; set; } = new List<SalesDetailDto>();

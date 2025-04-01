@@ -186,10 +186,13 @@ namespace POSIMSWebApi.Application.Services
 
 
             var receiving = _unitOfWork.StocksReceiving.GetQueryable()
-            .Include(e => e.StocksHeaderFk.ProductFK);
+                .Include(e => e.InventoryBeginningFk)
+                .Include(e => e.StocksHeaderFk)
+                .ThenInclude(e => e.ProductFK);
 
             var current = await receiving
-                .Where(e => e.CreationTime >= DateTime.UtcNow.AddHours(-input.NumberOfHours))
+                //.Where(e => e.CreationTime >= DateTime.UtcNow.AddHours(-input.NumberOfHours))
+                .Where(e => e.InventoryBeginningFk.Status == Domain.Enums.InventoryStatus.Open)
                 .GroupBy(e => e.StocksHeaderFk.ProductFK.Name)
                 .Select(e => new
                 {
@@ -197,9 +200,15 @@ namespace POSIMSWebApi.Application.Services
                     GeneratedQuantity = e.Sum(x => x.Quantity),
                 }).ToListAsync();
 
+            var baselineInventory = await receiving.Where(e => e.InventoryBeginningFk.Status == Domain.Enums.InventoryStatus.Closed).FirstOrDefaultAsync();
+
+            if(baselineInventory is null)
+            {
+
+            }
+
             var baseline = await receiving
-                .Where(e => e.CreationTime >= DateTime.UtcNow.AddHours(-input.NumberOfHours * 2)
-                            && e.CreationTime <= DateTime.UtcNow.AddHours(-input.NumberOfHours))
+                .Where(e => e.InventoryBeginningId == baselineInventory.InventoryBeginningId)
                 .GroupBy(e => e.StocksHeaderFk.ProductFK.Name)
                 .Select(e => new
                 {
@@ -216,8 +225,8 @@ namespace POSIMSWebApi.Application.Services
                         GeneratedQuantity = currentItem.GeneratedQuantity,
                         BaselineQuantity = baselineItem.GeneratedQuantity,
                         DifferentialPercentage = baselineItem.GeneratedQuantity != 0
-                            ? (currentItem.GeneratedQuantity - baselineItem.GeneratedQuantity) /
-                              baselineItem.GeneratedQuantity * 100m
+                            ? Math.Round((currentItem.GeneratedQuantity - baselineItem.GeneratedQuantity) /
+                              baselineItem.GeneratedQuantity * 100m, 2,MidpointRounding.AwayFromZero)
                             : 100m // If baseline GeneratedQuantity is 0, consider 100% difference
                     })
                     .DefaultIfEmpty(new GetStocksGenerationDto

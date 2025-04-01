@@ -194,7 +194,7 @@ namespace POSIMSWebApi.Application.Services
                                               {
                                                   InventoryId = g.Key.InventoryBeginningId,
                                                   ProductId = g.Key.ProductId,
-                                                  ProductName = g.Select(x => x.ProductFK.Name).FirstOrDefault(),
+                                                  ProductName = g.FirstOrDefault().ProductFK.Name,
                                                   InventoryBegTime = g.Select(x => x.InventoryBeginningFk.CreationTime).FirstOrDefault(),
                                                   InventoryEndTime = g.Select(x => x.InventoryBeginningFk.TimeClosed).FirstOrDefault(),
                                                   BegQty = g.Sum(x => x.Qty),

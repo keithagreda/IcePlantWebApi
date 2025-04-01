@@ -27,7 +27,7 @@ namespace POSIMSWebApi.Controllers
             return Ok(result);
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPost("RegisterUser")]
         public async Task<ActionResult<ApiResponse<string>>> RegisterUser([FromQuery]RegisterUserDto input)
         {
