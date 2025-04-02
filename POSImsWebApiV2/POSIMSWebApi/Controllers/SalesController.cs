@@ -117,6 +117,67 @@ namespace POSIMSWebApi.Controllers
             var result = await _salesService.GetPerMonthSales(year);
             return Ok(result);
         }
+
+        [Authorize(Roles = UserRole.Admin + "," + UserRole.Owner)]
+        [HttpGet("GetSalesSummaryForReports")]
+
+        public async Task<ActionResult<ApiResponse<SalesSummaryWithEst>>> GetSalesSummaryForReports([FromQuery] GenericSearchParamsWithDateRange input)
+        {
+            //having issues with projecting estimated cost since there is no connection between what is sold and what is being received
+            DateTime dateTimeFrom = DateTime.UtcNow;
+            DateTime dateTimeTo = DateTime.UtcNow;
+
+            if(input.DateFrom is not null && input.DateTo is not null)
+            {
+                dateTimeFrom = (DateTime)input.DateFrom;
+                dateTimeTo = (DateTime)input.DateTo;
+            }
+
+            var query = _unitOfWork.SalesDetail.GetQueryable()
+                .Include(e => e.SalesHeaderFk)
+                .ThenInclude(e => e.InventoryBeginningFk)
+                .Include(e => e.SalesHeaderFk.CustomerFk)
+                .Include(e => e.ProductFk)
+                .Where(e => e.CreationTime >= dateTimeFrom && e.CreationTime <= dateTimeTo)
+                .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => e.ProductFk.Name.Contains(input.FilterText))
+                .Select(e => new SalesSummaryDto
+                {
+                    CustomerName = e.SalesHeaderFk.CustomerFk != null ? e.SalesHeaderFk.CustomerFk.Name : "-",
+                    DateTime = e.CreationTime,
+                    SoldBy = e.CreatedBy.ToString(),
+                    ProductName = e.ProductFk.Name,
+                    Quantity = e.Quantity,
+                    Rate = e.ProductPrice,
+                    TransNum = e.SalesHeaderFk.TransNum,
+                    TotalPrice = e.ActualSellingPrice != 0 ? e.ActualSellingPrice : e.Amount,
+                    CurrentInventory = e.SalesHeaderFk.InventoryBeginningFk.Status
+                });
+
+            var dailySales = await query.Where(e => e.CurrentInventory == Domain.Enums.InventoryStatus.Open).SumAsync(e => e.TotalPrice);
+
+            var result = await query.OrderByDescending(e => e.DateTime).ToListAsync();
+            var totalSales = result.Sum(e => e.TotalPrice);
+
+
+            foreach (var item in result)
+            {
+                var currUser = await _userManager.FindByIdAsync(item.SoldBy);
+
+                item.SoldBy = currUser?.UserName ?? "-";
+            }
+
+            var salesSumm = new SalesSummaryWithEst
+            {
+                DailySales = dailySales,
+                SalesSummaryDtos = result,
+                //TODO
+                TotalEstimatedCost = 0,
+                TotalSales = totalSales,
+            };
+
+
+            return Ok(ApiResponse<SalesSummaryWithEst>.Success(salesSumm));
+        }
         [Authorize(Roles = UserRole.Admin + "," + UserRole.Owner)]
         [HttpGet("GetSalesSummary")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<SalesSummaryWithEst>>>> GetSalesSummary([FromQuery] GenericSearchParams input)
@@ -172,6 +233,8 @@ namespace POSIMSWebApi.Controllers
             var res = new PaginatedResult<SalesSummaryWithEst>(resWithTotal, await query.CountAsync(), (int)input.PageNumber, (int)input.PageSize);
             return Ok(ApiResponse<PaginatedResult<SalesSummaryWithEst>>.Success(res));
         }
+
+
 
         [Authorize(Roles = UserRole.Admin + "," + UserRole.Cashier + "," + UserRole.Owner)]
         [HttpGet("ViewSales")]

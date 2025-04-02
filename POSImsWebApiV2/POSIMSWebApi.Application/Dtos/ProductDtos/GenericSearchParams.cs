@@ -12,4 +12,9 @@ namespace POSIMSWebApi.Application.Dtos.ProductDtos
         public DateTime? Date { get; set; }
     }
 
+    public class GenericSearchParamsWithDateRange : GenericSearchParams
+    {
+        public DateTime? DateFrom { get; set; }
+        public DateTime? DateTo { get; set; }
+    }
 }
