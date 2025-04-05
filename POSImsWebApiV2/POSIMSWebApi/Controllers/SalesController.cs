@@ -138,7 +138,7 @@ namespace POSIMSWebApi.Controllers
                 .ThenInclude(e => e.InventoryBeginningFk)
                 .Include(e => e.SalesHeaderFk.CustomerFk)
                 .Include(e => e.ProductFk)
-                .Where(e => e.CreationTime >= dateTimeFrom && e.CreationTime <= dateTimeTo)
+                .Where(e => e.CreationTime.Date >= dateTimeFrom.Date && e.CreationTime.Date <= dateTimeTo.Date)
                 .WhereIf(!string.IsNullOrWhiteSpace(input.FilterText), e => e.ProductFk.Name.Contains(input.FilterText))
                 .Select(e => new SalesSummaryDto
                 {
@@ -155,7 +155,7 @@ namespace POSIMSWebApi.Controllers
 
             var dailySales = await query.Where(e => e.CurrentInventory == Domain.Enums.InventoryStatus.Open).SumAsync(e => e.TotalPrice);
 
-            var result = await query.OrderByDescending(e => e.DateTime).ToListAsync();
+            var result = await query.OrderBy(e => e.DateTime).ToListAsync();
             var totalSales = result.Sum(e => e.TotalPrice);
 
 
@@ -173,6 +173,8 @@ namespace POSIMSWebApi.Controllers
                 //TODO
                 TotalEstimatedCost = 0,
                 TotalSales = totalSales,
+                From = dateTimeFrom,
+                To = dateTimeTo
             };
 
 

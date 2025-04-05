@@ -66,6 +66,8 @@ namespace POSIMSWebApi.Application.Dtos.Sales
         //sales based on inventory opening and closing
         public decimal DailySales { get; set; }
         public decimal TotalEstimatedCost { get; set; }
+        public DateTime From { get; set; }
+        public DateTime To { get; set; }
         public ICollection<SalesSummaryDto> SalesSummaryDtos { get; set; } = new List<SalesSummaryDto>();
     }
 
