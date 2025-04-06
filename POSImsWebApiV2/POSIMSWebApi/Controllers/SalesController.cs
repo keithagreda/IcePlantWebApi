@@ -118,7 +118,7 @@ namespace POSIMSWebApi.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = UserRole.Admin + "," + UserRole.Owner)]
+        [Authorize(Roles = UserRole.Admin + "," + UserRole.Owner + "," + UserRole.Cashier)]
         [HttpGet("GetSalesSummaryForReports")]
 
         public async Task<ActionResult<ApiResponse<SalesSummaryWithEst>>> GetSalesSummaryForReports([FromQuery] GenericSearchParamsWithDateRange input)
@@ -130,7 +130,7 @@ namespace POSIMSWebApi.Controllers
             if(input.DateFrom is not null && input.DateTo is not null)
             {
                 dateTimeFrom = (DateTime)input.DateFrom;
-                dateTimeTo = (DateTime)input.DateTo;
+                dateTimeTo = (DateTime)input.DateTo;    
             }
 
             var query = _unitOfWork.SalesDetail.GetQueryable()

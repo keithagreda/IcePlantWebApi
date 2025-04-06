@@ -218,7 +218,7 @@ namespace POSIMSWebApi.Application.Services
 
                 // Apply Filtering & Pagination
                 var paginatedQuery = await beginningInventoryQuery
-                    .WhereIf(!string.IsNullOrWhiteSpace(input.ProductName), e => e.ProductName.Contains(input.ProductName))
+                    .WhereIf(!string.IsNullOrWhiteSpace(input.ProductName), e => e.ProductName.ToLower().Contains(input.ProductName.ToLower()))
                     .WhereIf(input.MinCreationTime is not null, e => e.InventoryBegTime >= ConvertToUTC8(input.MinCreationTime))
                     .WhereIf(input.MaxClosedTime is not null, e => e.InventoryEndTime <= ConvertToUTC8(input.MaxClosedTime).AddHours(23).AddMinutes(59))
                     .OrderByDescending(e => e.InventoryEndTime)
