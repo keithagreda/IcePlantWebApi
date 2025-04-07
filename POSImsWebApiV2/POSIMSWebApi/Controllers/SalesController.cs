@@ -206,7 +206,7 @@ namespace POSIMSWebApi.Controllers
 
             var dailySales = await query.Where(e => e.CurrentInventory == Domain.Enums.InventoryStatus.Open).SumAsync(e => e.TotalPrice);
 
-            var result = await query.ToPaginatedResult(input.PageNumber, input.PageSize).OrderByDescending(e => e.DateTime).ToListAsync();
+            var result = await query.OrderByDescending(e => e.DateTime).ToPaginatedResult(input.PageNumber, input.PageSize).ToListAsync();
             var totalSales = result.Sum(e => e.TotalPrice);
 
 
@@ -218,13 +218,13 @@ namespace POSIMSWebApi.Controllers
             }
 
               var salesSumm = new SalesSummaryWithEst
-            {
-                DailySales = dailySales,
-                SalesSummaryDtos = result,
-                //TODO
-                TotalEstimatedCost = 0,
-                TotalSales = totalSales,
-            };
+                {
+                    DailySales = dailySales,
+                    SalesSummaryDtos = result,
+                    //TODO
+                    TotalEstimatedCost = 0,
+                    TotalSales = totalSales,
+                };
 
             var resWithTotal = new List<SalesSummaryWithEst>
             {
@@ -276,29 +276,26 @@ namespace POSIMSWebApi.Controllers
                 foreach(var header in projection)
                 {
                     var currUser = await _userManager.FindByIdAsync(header.SoldBy);
-                    var finalTotalSales = 0m;
 
                     header.SoldBy = currUser?.UserName ?? "";
 
-                    foreach(var item in header.ViewSalesDetailDtos)
-                    {
-                        header.ViewSalesDetailDtos.ForEach((item) =>
-                        {
-                            finalTotalSales += item.Amount;
-                        });
+                    //var finalTotalSales = 0m;
+                    //finalTotalSales = header.ViewSalesDetailDtos.Sum(e => e.Amount);
 
-
-                        if (finalTotalSales == header.TotalAmount)
-                        {
-                            header.FinalTotalAmount = header.TotalAmount;
-                            header.Discount = 0m;
-                        }
-                        else
-                        {
-                            header.FinalTotalAmount = finalTotalSales;
-                            header.Discount = Math.Round((header.TotalAmount - finalTotalSales) / header.TotalAmount * 100, 2, MidpointRounding.AwayFromZero);
-                        }
-                    }
+                    //foreach(var item in header.ViewSalesDetailDtos)
+                    //{
+                    //    finalTotalSales += item.Amount;
+                    //}
+                    //if (finalTotalSales == header.TotalAmount)
+                    //{
+                    //    header.FinalTotalAmount = header.TotalAmount;
+                    //    header.Discount = 0m;
+                    //}
+                    //else
+                    //{
+                    //    header.FinalTotalAmount = finalTotalSales;
+                    //    header.Discount = Math.Round((header.TotalAmount - finalTotalSales) / header.TotalAmount * 100, 2, MidpointRounding.AwayFromZero);
+                    //}
                 }
                 var res = new PaginatedResult<ViewSalesHeaderDto>(projection, await query.CountAsync(), (int)input.PageNumber, (int)input.PageSize);
                 return Ok(ApiResponse<PaginatedResult<ViewSalesHeaderDto>>.Success(res));

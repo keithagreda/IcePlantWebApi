@@ -136,6 +136,7 @@ namespace POSIMSWebApi.Application.Services
             var query = from ibd in _unitOfWork.InventoryBeginningDetails.GetQueryable()
                         join ib in _unitOfWork.InventoryBeginning.GetQueryable() on ibd.InventoryBeginningId equals ib.Id
                         join p in _unitOfWork.Product.GetQueryable() on ibd.ProductId equals p.Id
+                        where ib.CreationTime >= ConvertToUTC8(input.MinCreationTime)
                         group ibd by new { ibd.ProductId, ibd.InventoryBeginningId } into g
                         select new
                         {
@@ -161,7 +162,8 @@ namespace POSIMSWebApi.Application.Services
 
             var totalCount = await query.CountAsync();
 
-            var paginated = query.WhereIf(input.MinCreationTime is not null, e => e.InventoryBegTime >= ConvertToUTC8(input.MinCreationTime))
+            var paginated = query
+                //.WhereIf(input.MinCreationTime is not null, e => e.InventoryBegTime >= ConvertToUTC8(input.MinCreationTime))
                     .WhereIf(input.MaxClosedTime is not null, e => e.InventoryEndTime <= ConvertToUTC8(input.MaxClosedTime).AddHours(23).AddMinutes(59));
             var grouped = await paginated.GroupBy(i => i.InventoryId)
                 .Select(e => new GetStockCardDayDto

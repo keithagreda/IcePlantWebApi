@@ -61,7 +61,7 @@ namespace POSIMSWebApi.Controllers
             try
             {
 
-                    var data = await _inventoryService.GetStockCard(input);
+                var data = await _inventoryService.GetStockCard(input);
                 return Ok(data);
             }
             catch (Exception ex)
